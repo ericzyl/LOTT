@@ -8,6 +8,10 @@ from nltk.corpus import stopwords
 from nltk.stem.snowball import SnowballStemmer
 from sklearn.manifold import MDS
 
+# Packages for BERT Embeddings
+import torch
+from transformers import AutoTokenizer, AutoModel
+
 
 def load_wmd_data(path):
     """Load data used in the WMD paper.
@@ -145,6 +149,85 @@ def change_embeddings(vocab, bow_data, embed_path):
     bow_data = bow_data[:, new_vocab_idx]
     return new_vocab, data_embed_vocab, bow_data
 
+def change_embeddings_bert(vocab, bow_data, model_name='bert-base-uncased', device=None, batch_size=256): # Default BERT-Base-Uncased Model
+    # Function to replace Embeddings with BERT-style Embeddings by generating the Embeddings for each word in the Vocabulary by passing them through the Model instead of reading off from the Embedding File as we did for the GloVe Embeddings
+    if device is None:
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModel.from_pretrained(model_name).to(device)
+    model.eval()
+
+    # Preparing List of Words
+    words = list(vocab)
+
+    data_embed_vocab = {}
+    found_idx = []
+    batch = []
+
+    # Encoding in Batches of Words
+    def encode_batch(batch_words):
+        # Tokenizer adds Special Tokens ([CLS], [SEP]) for BERT-style Models and we remove them later
+        print('Batch Encoding...')
+        inputs = tokenizer(batch_words, padding=True, truncation=True, return_tensors='pt', add_special_tokens=True)
+        input_ids = inputs['input_ids'].to(device)
+        attention_mask = inputs['attention_mask'].to(device)
+
+        with torch.no_grad():
+            out = model(input_ids=input_ids, attention_mask=attention_mask)
+            last = out.last_hidden_state
+
+        # Make mask that excludes padding and also special tokens [CLS] and [SEP]
+        mask = attention_mask.clone()
+        special_ids = []
+        if tokenizer.cls_token_id is not None:
+            special_ids.append(tokenizer.cls_token_id)
+        if tokenizer.sep_token_id is not None:
+            special_ids.append(tokenizer.sep_token_id)
+        if len(special_ids) > 0:
+            for sid in special_ids:
+                mask = mask & (input_ids != sid)
+
+        mask = mask.unsqueeze(-1).to(last.dtype)
+        summed = (last * mask).sum(dim=1)
+        lengths = mask.sum(dim=1)
+        lengths = lengths.clamp(min=1)
+        mean_emb = (summed / lengths).cpu().numpy()
+        return mean_emb
+
+    n = len(words)
+    i = 0
+    while i < n:
+        j = min(n, i + batch_size)
+        batch_words = words[i:j]
+        try:
+            emb_batch = encode_batch(batch_words)
+        except Exception as e:
+            # Fallback: Can Encode each word separately if Batched Encoding fails
+            print('Batched Encoding failed, Resorting to Word-by-Word mode')
+            emb_batch = []
+            for w in batch_words:
+                emb_w = encode_batch([w])[0]
+                emb_batch.append(emb_w)
+            emb_batch = np.stack(emb_batch, axis=0)
+
+        for k, w in enumerate(batch_words):
+            # Storing as np array (float32) for Memory efficiency
+            data_embed_vocab[w] = emb_batch[k].astype(np.float32)
+            found_idx.append(i + k)
+
+        i = j
+
+    # Building new Vocab and trimmed bow_data columns
+    new_vocab_idx = [idx for idx in range(len(vocab))]
+    new_vocab = [words[idx] for idx in new_vocab_idx]
+
+    bow_data_truncated = bow_data[:, new_vocab_idx]
+
+    print('Success in generating BERT-style Embeddings')
+
+    return new_vocab, data_embed_vocab, bow_data_truncated
+
 
 def fit_topics(data, embeddings, vocab, K):
     """Fit a topic model to bag-of-words data."""
@@ -167,6 +250,7 @@ def loader(data_path,
            p=1,
            K_lda=70,
            glove_embeddings=True,
+           bert_model_name=None, # By Default no BERT Embeddings
            stemming=True,
            n_words_keep = 20):
     """ Load dataset and embeddings from data path."""
@@ -174,10 +258,18 @@ def loader(data_path,
     vocab, embed_vocab, bow_data, y = load_wmd_data(data_path)
     y = y - 1
 
+    if glove_embeddings and bert_model_name is not None:
+        raise ValueError("Specify either glove_embeddings=True or bert_model_name, not both.")
+
     # Use GLOVE word embeddings
     if glove_embeddings:
         vocab, embed_vocab, bow_data = change_embeddings(
             vocab, bow_data, embeddings_path)
+    # Using BERT Word Embeddings by specifying BERT Model
+    elif bert_model_name is not None:
+        print('Going to use BERT-style Embeddings')
+        vocab, embed_vocab, bow_data = change_embeddings_bert(vocab, bow_data, model_name=bert_model_name)
+
     # Reduce vocabulary by removing short words, stop words, and stemming
     if stemming:
         vocab, embed_vocab, bow_data = reduce_vocab(

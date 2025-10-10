@@ -15,6 +15,10 @@ import distances
 import hott
 import lot
 
+# NLTK demands Stopwords to be downloaded first now
+import nltk
+nltk.download('stopwords')
+
 # Download datasets used by Kusner et al from
 # https://www.dropbox.com/sh/nf532hddgdt68ix/AABGLUiPRyXv6UL2YAcHmAFqa?dl=0
 # and put them into
@@ -28,10 +32,10 @@ embeddings_path = './data/glove.6B/glove.6B.300d.txt'
 
 # Pick a dataset (uncomment the line you want)
 # data_name = 'bbcsport-emd_tr_te_split.mat'
-# data_name = 'twitter-emd_tr_te_split.mat'
+data_name = 'twitter-emd_tr_te_split.mat'
 # data_name = 'r8-emd_tr_te3.mat'
 # data_name = 'amazon-emd_tr_te_split.mat'
-data_name = 'classic-emd_tr_te_split.mat'
+# data_name = 'classic-emd_tr_te_split.mat'
 # data_name = 'ohsumed-emd_tr_te_ix.mat'
 
 # data_name = '20ng2_500-emd_tr_te.mat'
@@ -39,7 +43,15 @@ data_name = 'classic-emd_tr_te_split.mat'
 
 # p=1 for W1 and p=2 for W2
 p = 1
-data = loader(data_path + data_name, embeddings_path, p=p)
+# For Standard GloVe Embeddings
+# data = loader(data_path + data_name, embeddings_path, p=p)
+# For BERT Embeddings
+data = loader(data_path + data_name, embeddings_path, p=p,
+              glove_embeddings=False, bert_model_name='roberta-large')
+# Getting the following Test errors on Twitter Dataset and Mac M4 CPU-
+# With GloVe, LOTT- 0.32175; With BERT-Base-Uncased, LOTT- 0.342342; with DistilBERT-Base-Uncased, LOTT- 0.33333; 
+# With RoBERTa-Base, LOTT- 0.35512; with BERT-Large-Uncased, LOTT-0.324324; with RoBERTa-Large, LOTT- 0.350064;
+
 cost_E = data['cost_E']
 cost_T = data['cost_T']
 

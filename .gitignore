@@ -1,0 +1,8 @@
+# Data and Embeddings
+data/
+
+# Pycache files
+__pycache__/
+
+# DS Store files
+.DS_Store
