@@ -96,6 +96,8 @@ for method in methods.keys():
         X_train_lot = lot.create_lot_embeddings(topic_train, gaussian_vector, lda_centers, cost_T)
         X_test_lot = lot.create_lot_embeddings(topic_test, gaussian_vector, lda_centers, cost_T)
 
+        # Replaced with BERT document wide embeddings
+
         # X_train, X_test = normalize(bow_train, 'l1'), normalize(bow_test, 'l1')
 
         # train knn classifier
