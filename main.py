@@ -15,9 +15,7 @@ import distances
 import hott
 import lot
 
-# NLTK demands Stopwords to be downloaded first now
-import nltk
-nltk.download('stopwords')
+import bert
 
 # Download datasets used by Kusner et al from
 # https://www.dropbox.com/sh/nf532hddgdt68ix/AABGLUiPRyXv6UL2YAcHmAFqa?dl=0
@@ -31,8 +29,8 @@ data_path = './data/'
 embeddings_path = './data/glove.6B/glove.6B.300d.txt'
 
 # Pick a dataset (uncomment the line you want)
-# data_name = 'bbcsport-emd_tr_te_split.mat'
-data_name = 'twitter-emd_tr_te_split.mat'
+data_name = 'bbcsport-emd_tr_te_split.mat'
+# data_name = 'twitter-emd_tr_te_split.mat'
 # data_name = 'r8-emd_tr_te3.mat'
 # data_name = 'amazon-emd_tr_te_split.mat'
 # data_name = 'classic-emd_tr_te_split.mat'
@@ -43,15 +41,7 @@ data_name = 'twitter-emd_tr_te_split.mat'
 
 # p=1 for W1 and p=2 for W2
 p = 1
-# For Standard GloVe Embeddings
-# data = loader(data_path + data_name, embeddings_path, p=p)
-# For BERT Embeddings
-data = loader(data_path + data_name, embeddings_path, p=p,
-              glove_embeddings=False, bert_model_name='roberta-large')
-# Getting the following Test errors on Twitter Dataset and Mac M4 CPU-
-# With GloVe, LOTT- 0.32175; With BERT-Base-Uncased, LOTT- 0.342342; with DistilBERT-Base-Uncased, LOTT- 0.33333; 
-# With RoBERTa-Base, LOTT- 0.35512; with BERT-Large-Uncased, LOTT-0.324324; with RoBERTa-Large, LOTT- 0.350064;
-
+data = loader(data_path + data_name, embeddings_path, p=p)
 cost_E = data['cost_E']
 cost_T = data['cost_T']
 
@@ -78,25 +68,68 @@ bow_train, bow_test, topic_train, topic_test, y_train, y_test = train_test_split
 # #####################
 
 # Pick a method among RWMD, WMD, WMD-T20, HOTT, HOFTT
-methods = {'LOTT': lot.lot,
+methods = {
+        'LOTT': lot.lot,
            'HOTT': hott.hott,
            'HOFTT': hott.hoftt,
            'WMD-T20': lambda p, q, C: distances.wmd(p, q, C, truncate=20),
            'RWMD': distances.rwmd,
-           'WMD': distances.wmd}
+           'WMD': distances.wmd,
+           # BERT Methods
+           'SBERT': None,
+           'SBERT-large': None,
+           'DistilBERT': None,
+           'RoBERTa': None,
+           'BERT': None
+           }
     
+vocab = data['vocab'] # Vocabulary obtained from Data Object
+
 for method in methods.keys():
     
     t_s = time.time()
+    
+    if method in ['SBERT', 'SBERT-large', 'DistilBERT', 'RoBERTa', 'BERT']:
+        print(f"\nProcessing {method}...")
+        
+        # Creating BERT embeddings for train and test
+        model_name = bert.BERT_MODELS[method]
+        X_train_bert = bert.create_bert_embeddings(
+            bow_train, vocab, 
+            model_name=model_name,
+            aggregation='mean',
+            batch_size=16 # Can reduce Batch Size if running out of Memory
+        )
+        X_test_bert = bert.create_bert_embeddings(
+            bow_test, vocab,
+            model_name=model_name,
+            aggregation='mean',
+            batch_size=16
+        )
+        
+        # Training KNN Classifier
+        knn_classifier = KNeighborsClassifier(n_neighbors=7, metric='euclidean')
+        knn_classifier.fit(X_train_bert, y_train)
+        y_pred = knn_classifier.predict(X_test_bert)
+        
+        # Computing Test Error
+        test_error = 1 - accuracy_score(y_test, y_pred)
+        runtime = time.time() - t_s
+        num_pairs = len(X_test_bert) * len(X_train_bert)
+        pairs_per_second = num_pairs / runtime
+
+        # Results: Test Errors corresponding to different BERT Embeddings for BBC Sport Dataset
+        # SBERT- 0.140541, SBERT-large- 0.086486, DistilBERT- 0.081081, RoBERTa- 0.167568, BERT- 0.081081
+        # Comparing with LDA Topic Methods-
+        # LOTT- 0.140541, HOTT- 0.021622, HOFTT- 0.021622, WMD-T20- 0.043243, RWMD- 0.032432, WMD- 0.027027
+
     # Get train/test data representation and transport cost
-    if method in ['LOTT']:
+    elif method in ['LOTT']:
         # create lot embedding
         #bimodal_vector = lot.makeBimodal1D(size=topic_train.shape[1], fwhm1=10, center1=20, fwhm2=5, center2=80)
         gaussian_vector = lot.makeGaussian1D(size=topic_train.shape[1], fwhm=25)
         X_train_lot = lot.create_lot_embeddings(topic_train, gaussian_vector, lda_centers, cost_T)
         X_test_lot = lot.create_lot_embeddings(topic_test, gaussian_vector, lda_centers, cost_T)
-
-        # Replaced with BERT document wide embeddings
 
         # X_train, X_test = normalize(bow_train, 'l1'), normalize(bow_test, 'l1')
 
