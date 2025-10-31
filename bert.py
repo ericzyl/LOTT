@@ -2,6 +2,7 @@ import numpy as np
 from transformers import AutoTokenizer, AutoModel
 import torch
 from tqdm import tqdm
+import time
 
 class BERTDocumentEmbedder: # Class to generate Document Embeddings using different BERT Models
     def __init__(self, model_name='sentence-transformers/all-MiniLM-L6-v2', 
