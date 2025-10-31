@@ -2,7 +2,7 @@ lda
 matplotlib
 nltk
 numpy
-ot
+POT
 scikit-learn
 scipy
 tqdm
