@@ -68,6 +68,7 @@ def bow_to_text(bow_data, vocab): # Converting Bag-of-Words to Text
             if count > 0:
                 words.extend([vocab[idx]] * int(count))
         documents.append(' '.join(words))
+        # print(documents[-1])
     return documents
 
 
@@ -77,8 +78,13 @@ def create_bert_embeddings(bow_data, vocab, model_name='sentence-transformers/al
     documents = bow_to_text(bow_data, vocab)
     
     # Initializing Embedder and encoding
+    t1 = time.time()
     embedder = BERTDocumentEmbedder(model_name=model_name, aggregation=aggregation)
+    t2 = time.time()
     embeddings = embedder.encode_documents(documents, batch_size=batch_size)
+    t3 = time.time()
+    print(f"Time to load Model: {t2 - t1:.2f} seconds")
+    print(f"Time to encode Documents: {t3 - t2:.2f} seconds")
     
     return embeddings
 

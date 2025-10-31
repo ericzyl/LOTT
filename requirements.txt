@@ -1,2 +1,9 @@
-tqdm==4.67.1
-transformers==4.57.0
+lda
+matplotlib
+nltk
+numpy
+ot
+scikit-learn
+scipy
+tqdm
+transformers
