@@ -53,7 +53,8 @@ sbert_time = time.time() - start_time
 bert_text_embeddings = list(zip(train_texts, sbert_embeddings))
 
 # Creating a Dummy Embedding Wrapper
-dummy_sbert_wrapper = CustomEmbeddingWrapper(lambda texts: create_bert_embeddings(bow_train, vocab))
+# dummy_sbert_wrapper = CustomEmbeddingWrapper(lambda texts: create_bert_embeddings(bow_train, vocab))
+dummy_sbert_wrapper = CustomEmbeddingWrapper(lambda texts: sbert_embeddings)
 
 sbert_vectorstore = FAISS.from_embeddings(bert_text_embeddings, dummy_sbert_wrapper)
 
