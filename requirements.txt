@@ -1,3 +1,8 @@
+datasets
+# faiss-cpu
+# For GPU support, replace above with:
+faiss-gpu
+huggingface-hub
 langchain
 langchain-community
 langchain-core
@@ -8,5 +13,6 @@ numpy
 POT
 scikit-learn
 scipy
+sentence-transformers
 tqdm
 transformers

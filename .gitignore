@@ -6,3 +6,7 @@ __pycache__/
 
 # DS Store files
 .DS_Store
+
+# RAG Pipeline Generated Folders
+RAG_BeIR_Pipeline/*
+!RAG_BeIR_Pipeline/*.py
