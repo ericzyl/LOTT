@@ -1,3 +1,4 @@
+beir
 datasets
 # faiss-cpu
 # For GPU support, replace above with:
