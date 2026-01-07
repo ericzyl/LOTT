@@ -3,7 +3,7 @@ import numpy as np
 import pickle
 from collections import Counter
 from typing import Dict, List, Tuple
-from tqdm import tqdm
+# from tqdm import tqdm
 import re
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
@@ -63,7 +63,11 @@ class TextPreprocessor:
         
         # Counting word frequencies
         word_counts = Counter()
-        for doc_id, doc_data in tqdm(corpus.items(), desc="Counting words"):
+        # for doc_id, doc_data in tqdm(corpus.items(), desc="Counting words"):
+        print("Counting words in corpus...")
+        for idx, (doc_id, doc_data) in enumerate(corpus.items()):
+            if idx % 5000 == 0:
+                print(f"  Processed {idx}/{len(corpus)} documents")
             words = self.tokenize(doc_data['text'])
             word_counts.update(words)
         
@@ -74,7 +78,12 @@ class TextPreprocessor:
         glove_embeddings = {}
         
         with open(glove_path, 'r', encoding='utf-8') as f:
-            for line in tqdm(f, desc="Loading GloVe"):
+            # for line in tqdm(f, desc="Loading GloVe"):
+            lines = f.readlines()
+            total_lines = len(lines)
+            for idx, line in enumerate(lines):
+                if idx % 50000 == 0:
+                    print(f"  Loaded {idx}/{total_lines} embeddings")
                 parts = line.strip().split()
                 word = parts[0]
                 embedding = np.array([float(x) for x in parts[1:]])
@@ -122,7 +131,10 @@ class TextPreprocessor:
         doc_ids = list(corpus.keys())
         bow_matrix = np.zeros((len(doc_ids), len(self.vocab)), dtype=np.int32)
         
-        for i, doc_id in enumerate(tqdm(doc_ids, desc="Converting to BoW")):
+        # for i, doc_id in enumerate(tqdm(doc_ids, desc="Converting to BoW")):
+        for i, doc_id in enumerate(doc_ids):
+            if i % 5000 == 0:
+                print(f"  Converted {i}/{len(doc_ids)} documents")
             text = corpus[doc_id]['text']
             bow_matrix[i] = self.text_to_bow(text)
         

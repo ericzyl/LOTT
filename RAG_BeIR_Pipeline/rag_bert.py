@@ -4,7 +4,7 @@ import faiss
 import pickle
 import time
 from typing import Dict, List, Tuple
-from tqdm import tqdm
+# from tqdm import tqdm
 import config
 
 
@@ -64,10 +64,16 @@ class BERTRAGSystem:
         all_doc_ids = []
         all_scores = []
         
-        iterator = tqdm(range(len(query_embeddings)), desc="Searching queries") \
-                   if show_progress else range(len(query_embeddings))
+        # iterator = tqdm(range(len(query_embeddings)), desc="Searching queries") \
+        #            if show_progress else range(len(query_embeddings))
         
-        for i in iterator:
+        # for i in iterator:
+        if show_progress:
+            print(f"Searching {len(query_embeddings)} queries...")
+        
+        for i in range(len(query_embeddings)):
+            if show_progress and i % 1000 == 0:
+                print(f"  Progress: {i}/{len(query_embeddings)} queries")
             doc_ids, scores = self.search(query_embeddings[i], k=k)
             all_doc_ids.append(doc_ids)
             all_scores.append(scores)

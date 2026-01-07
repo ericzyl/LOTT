@@ -1,7 +1,7 @@
 # LOTT Embedding Generation
 import numpy as np
 import ot
-from tqdm import tqdm
+# from tqdm import tqdm
 from typing import List
 import config
 
@@ -48,10 +48,16 @@ def create_lot_embeddings(topic_proportions: np.ndarray,
     # LOTT Embeddings for multiple Documents
     lot_embeddings = []
     
-    iterator = tqdm(range(len(topic_proportions)), desc="Creating LOTT embeddings") \
-               if show_progress else range(len(topic_proportions))
+    # iterator = tqdm(range(len(topic_proportions)), desc="Creating LOTT embeddings") \
+    #            if show_progress else range(len(topic_proportions))
     
-    for i in iterator:
+    # for i in iterator:
+    if show_progress:
+        print(f"Creating LOTT embeddings for {len(topic_proportions)} documents...")
+    
+    for i in range(len(topic_proportions)):
+        if show_progress and i % 5000 == 0:
+            print(f"  Progress: {i}/{len(topic_proportions)} documents")
         # Topic distribution for current Document
         doc_topics = topic_proportions[i].reshape(-1)
         

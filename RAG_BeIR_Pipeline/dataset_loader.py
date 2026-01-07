@@ -3,7 +3,7 @@ import pickle
 from datasets import load_dataset
 from typing import Dict, List, Tuple
 import numpy as np
-from tqdm import tqdm
+# from tqdm import tqdm
 import config
 from beir import util
 from beir.datasets.data_loader import GenericDataLoader
@@ -57,7 +57,11 @@ class TRECCovidLoader:
             print(f"Limited to {len(corpus_items)} documents for testing")
 
         self.corpus = {}
-        for doc_id, doc_data in tqdm(corpus_items, desc="Processing corpus"):
+        # for doc_id, doc_data in tqdm(corpus_items, desc="Processing corpus"):
+        print("Processing corpus...")
+        for idx, (doc_id, doc_data) in enumerate(corpus_items):
+            if idx % 5000 == 0:
+                print(f"  Processed {idx}/{len(corpus_items)} documents")
             title = doc_data.get('title', '')
             text = doc_data.get('text', '')
             full_text = f"{title}. {text}" if title else text
@@ -80,7 +84,7 @@ class TRECCovidLoader:
             #     query_id = item['_id']
             #     query_text = item['text']
             #     self.queries[query_id] = query_text
-            # Use BeIR queries directly
+            # Using BeIR queries directly
             self.queries = beir_queries
 
             print(f"Loaded {len(self.queries)} queries")

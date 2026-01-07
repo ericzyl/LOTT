@@ -3,7 +3,7 @@ import numpy as np
 import pickle
 import lda
 from sklearn.metrics.pairwise import euclidean_distances
-from tqdm import tqdm
+# from tqdm import tqdm
 import config
 
 
@@ -111,7 +111,10 @@ class LDATrainer:
         self.topic_cost_matrix = np.zeros((self.n_topics, self.n_topics))
         
         # Computing only Upper Triangle (Symmetric Matrix)
-        for i in tqdm(range(self.n_topics), desc="Computing topic costs"):
+        print("Computing topic costs...")
+        for i in range(self.n_topics):
+            if i % 10 == 0:
+                print(f"  Progress: {i}/{self.n_topics} topics")
             for j in range(i + 1, self.n_topics):
                 self.topic_cost_matrix[i, j] = sparse_ot(
                     self.topics[i], 
