@@ -4,7 +4,7 @@ import ot
 # from tqdm import tqdm
 from typing import List
 import config
-
+from sklearn.decomposition import PCA
 
 def makeGaussian1D(size, fwhm=3, center=None):
     # Generating a 1D Gaussian distribution.
@@ -148,11 +148,11 @@ def generate_and_save_lott_embeddings(bow_train: np.ndarray, bow_test: np.ndarra
     print("="*80)
     train_embeddings, train_topics = generator.generate_from_bow(bow_train, show_progress=True)
     
-    # Saving Train Embeddings and Topics
-    np.save(config.LOTT_TRAIN_EMBEDDINGS, train_embeddings)
-    np.save(config.TOPIC_PROPORTIONS_TRAIN, train_topics)
-    print(f"Saved train embeddings to {config.LOTT_TRAIN_EMBEDDINGS}")
-    print(f"Shape: {train_embeddings.shape}")
+    # # Saving Train Embeddings and Topics
+    # np.save(config.LOTT_TRAIN_EMBEDDINGS, train_embeddings)
+    # np.save(config.TOPIC_PROPORTIONS_TRAIN, train_topics)
+    # print(f"Saved train embeddings to {config.LOTT_TRAIN_EMBEDDINGS}")
+    # print(f"Shape: {train_embeddings.shape}")
     
     # Generating Test Embeddings
     print("\n" + "="*80)
@@ -160,13 +160,46 @@ def generate_and_save_lott_embeddings(bow_train: np.ndarray, bow_test: np.ndarra
     print("="*80)
     test_embeddings, test_topics = generator.generate_from_bow(bow_test, show_progress=True)
     
-    # Saving Test Embeddings and Topics
-    np.save(config.LOTT_TEST_EMBEDDINGS, test_embeddings)
-    np.save(config.TOPIC_PROPORTIONS_TEST, test_topics)
-    print(f"Saved test embeddings to {config.LOTT_TEST_EMBEDDINGS}")
-    print(f"Shape: {test_embeddings.shape}")
+    # # Saving Test Embeddings and Topics
+    # np.save(config.LOTT_TEST_EMBEDDINGS, test_embeddings)
+    # np.save(config.TOPIC_PROPORTIONS_TEST, test_topics)
+    # print(f"Saved test embeddings to {config.LOTT_TEST_EMBEDDINGS}")
+    # print(f"Shape: {test_embeddings.shape}")
     
-    return train_embeddings, test_embeddings, train_topics, test_topics
+    # return train_embeddings, test_embeddings, train_topics, test_topics
+
+    # PCA Compression
+    print("\nCompressing LOTT embeddings with PCA...")
+    print(f"Original dimension: {train_embeddings.shape[1]}")
+    
+    pca = PCA(n_components=384)  # Matching BERT dimension
+    train_embeddings_compressed = pca.fit_transform(train_embeddings)
+    test_embeddings_compressed = pca.transform(test_embeddings)
+    
+    print(f"Compressed dimension: {train_embeddings_compressed.shape[1]}")
+    print(f"Explained variance: {pca.explained_variance_ratio_.sum():.4f}")
+    
+    # Saving Compressed Embeddings
+    np.save(config.LOTT_TRAIN_EMBEDDINGS, train_embeddings_compressed)
+    np.save(config.LOTT_TEST_EMBEDDINGS, test_embeddings_compressed)
+    
+    # Also save the PCA model for query compression
+    import pickle
+    pca_path = config.MODELS_DIR / "lott_pca.pkl"
+    with open(pca_path, 'wb') as f:
+        pickle.dump(pca, f)
+    print(f"PCA model saved to {pca_path}")
+    
+    # Save topic proportions
+    np.save(config.TOPIC_PROPORTIONS_TRAIN, train_topics)
+    np.save(config.TOPIC_PROPORTIONS_TEST, test_topics)
+    
+    print(f"Saved train embeddings to {config.LOTT_TRAIN_EMBEDDINGS}")
+    print(f"Shape: {train_embeddings_compressed.shape}")
+    print(f"Saved test embeddings to {config.LOTT_TEST_EMBEDDINGS}")
+    print(f"Shape: {test_embeddings_compressed.shape}")
+    
+    return train_embeddings_compressed, test_embeddings_compressed, train_topics, test_topics
 
 
 def load_lott_embeddings():

@@ -163,8 +163,16 @@ def generate_lott_query_embeddings(queries: Dict[str, str]) -> Tuple[np.ndarray,
     )
     
     query_embeddings, query_topics = generator.generate_from_bow(query_bow, show_progress=True)
+
+    print("Compressing query embeddings with PCA...")
+    pca_path = config.MODELS_DIR / "lott_pca.pkl"
+    with open(pca_path, 'rb') as f:
+        pca = pickle.load(f)
     
-    return query_embeddings, query_ids
+    query_embeddings_compressed = pca.transform(query_embeddings)
+    print(f"Query embeddings compressed: {query_embeddings_compressed.shape}")
+    
+    return query_embeddings_compressed, query_ids
 
 
 def test_lott_rag():
