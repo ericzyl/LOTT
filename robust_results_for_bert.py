@@ -9,8 +9,10 @@ import pandas as pd
 from data import loader
 import bert
 
-data_path = '/kaggle/input/bert-lott-exps-datasets/'
-embeddings_path = '/kaggle/input/bert-lott-exps-datasets/glove.6B.300d.txt'
+# data_path = '/kaggle/input/bert-lott-exps-datasets/'
+# embeddings_path = '/kaggle/input/bert-lott-exps-datasets/glove.6B.300d.txt'
+data_path = './data/'
+embeddings_path = './data/dolma_300_2024_1.2M.100_combined.txt'
 
 datasets = [
     'bbcsport-emd_tr_te_split.mat',
