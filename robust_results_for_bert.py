@@ -102,14 +102,14 @@ for data_name in datasets:
                     bow_train, vocab,
                     model_name=model_name,
                     aggregation='mean',
-                    batch_size=16,
+                    batch_size=128,
                     seed=perm_seed
                 )
                 X_test_bert = create_bert_embeddings_with_seed(
                     bow_test, vocab,
                     model_name=model_name,
                     aggregation='mean',
-                    batch_size=16,
+                    batch_size=128,
                     seed=perm_seed
                 )
                 
