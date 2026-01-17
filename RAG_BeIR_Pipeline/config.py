@@ -22,7 +22,8 @@ DATASET_NAME = "BeIR/trec-covid"
 MAX_DOCS = None  # None for Full Dataset, could be set to a Number during Testing
 
 # GLOVE_PATH = DATA_DIR / "glove.6B" / "glove.6B.300d.txt"
-GLOVE_PATH = "/kaggle/input/bert-lott-exps-datasets/glove.6B.300d.txt"
+# GLOVE_PATH = "/kaggle/input/bert-lott-exps-datasets/glove.6B.300d.txt"
+GLOVE_PATH = DATA_DIR / "wiki_giga_2024_300_MFT20_vectors_seed_2024_alpha_0.75_eta_0.05_combined.txt"
 GLOVE_DIM = 300
 
 # LDA Config
