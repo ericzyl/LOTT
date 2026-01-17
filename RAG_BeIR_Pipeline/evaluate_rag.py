@@ -310,6 +310,23 @@ def run_full_evaluation():
     lott_retrieved, lott_scores = lott_system.batch_search(
         lott_query_embeddings, k=100, show_progress=True
     )
+
+    print("\n" + "="*80)
+    print("DIAGNOSTIC: Checking if relevant docs are in index")
+    print("="*80)
+    
+    # Loading train doc IDs
+    import pickle
+    with open(config.DATA_DIR / 'pipeline_metadata.pkl', 'rb') as f:
+        metadata = pickle.load(f)
+    train_doc_ids = metadata['train_doc_ids']
+    
+    # Checking first 30 queries
+    for query_id in query_ids[:30]:
+        if query_id in qrels:
+            relevant_docs = set(qrels[query_id].keys())
+            docs_in_index = sum(1 for doc in relevant_docs if doc in train_doc_ids)
+            print(f"Query {query_id}: {docs_in_index}/{len(relevant_docs)} relevant docs in index")
     
     # Evaluation
     evaluator = RAGEvaluator(qrels)
