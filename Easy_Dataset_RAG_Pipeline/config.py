@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 
 # Base directories
-PROJECT_ROOT = Path(__file__).parent
+PROJECT_ROOT = Path(__file__).parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
 MODELS_DIR = PROJECT_ROOT / "Easy_Dataset_RAG_Pipeline/models"
 EMBEDDINGS_DIR = PROJECT_ROOT / "Easy_Dataset_RAG_Pipeline/embeddings"
