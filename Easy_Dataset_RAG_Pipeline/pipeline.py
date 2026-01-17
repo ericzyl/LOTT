@@ -123,7 +123,7 @@ def save_pipeline_metadata(doc_ids):
         'doc_ids': doc_ids
     }
     
-    metadata_path = config.DATA_DIR / 'Easy_Dataset_RAG_Pipeline/pipeline_metadata.pkl'
+    metadata_path = config.SAVE_DATA_DIR / 'pipeline_metadata.pkl'
     with open(metadata_path, 'wb') as f:
         pickle.dump(metadata, f)
     

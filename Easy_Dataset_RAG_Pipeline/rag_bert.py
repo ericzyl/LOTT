@@ -127,7 +127,7 @@ def build_bert_rag_system():
     
     # Load document IDs
     print("Loading document metadata...")
-    with open(config.DATA_DIR / 'Easy_Dataset_RAG_Pipeline/pipeline_metadata.pkl', 'rb') as f:
+    with open(config.SAVE_DATA_DIR / 'pipeline_metadata.pkl', 'rb') as f:
         metadata = pickle.load(f)
     doc_ids = metadata['doc_ids']
     

@@ -308,7 +308,7 @@ def run_full_evaluation():
     lott_system = build_lott_rag_system()
     
     # Load document IDs for diagnostic
-    with open(config.DATA_DIR / 'Easy_Dataset_RAG_Pipeline/pipeline_metadata.pkl', 'rb') as f:
+    with open(config.SAVE_DATA_DIR / 'pipeline_metadata.pkl', 'rb') as f:
         metadata = pickle.load(f)
     doc_ids = metadata['doc_ids']
     
