@@ -22,7 +22,7 @@ DATASET_NAME = "TREC-COVID"
 MAX_DOCS = None  # Set to None for full dataset, or a number for testing
 
 # GloVe embeddings
-GLOVE_PATH = DATA_DIR / "glove.6B" / "wiki_giga_2024_300_MFT20_vectors_seed_2024_alpha_0.75_eta_0.05_combined.txt"
+GLOVE_PATH = DATA_DIR / "wiki_giga_2024_300_MFT20_vectors_seed_2024_alpha_0.75_eta_0.05_combined.txt"
 GLOVE_DIM = 300
 
 # LDA configuration
