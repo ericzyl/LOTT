@@ -53,7 +53,7 @@ VOCAB_PATH = MODELS_DIR / "vocabulary.pkl"
 WORD_EMBEDDINGS_PATH = MODELS_DIR / "word_embeddings.npy"
 
 # Embedding paths
-BERT_EMBEDDINGS = EMBEDDINGS_DIR / "bert_embeddings.pkl"
+BERT_EMBEDDINGS = EMBEDDINGS_DIR / "bert_embeddings.npy"
 LOTT_EMBEDDINGS = EMBEDDINGS_DIR / "lott_embeddings.npy"
 TOPIC_PROPORTIONS = EMBEDDINGS_DIR / "topic_proportions.npy"
 
