@@ -102,22 +102,37 @@ def step_4_generate_bert_embeddings(train_corpus, test_corpus, train_doc_ids, te
     return train_embeddings, test_embeddings
 
 
-def step_5_generate_lott_embeddings(bow_train, bow_test):
-    # Step 5: Generating LOTT embeddings
+# def step_5_generate_lott_embeddings(bow_train, bow_test):
+#     # Step 5: Generating LOTT embeddings
+#     print("\n" + "="*80)
+#     print("STEP 5: GENERATING LOTT EMBEDDINGS")
+#     print("="*80)
+    
+#     if check_file_exists(config.LOTT_TRAIN_EMBEDDINGS) and check_file_exists(config.LOTT_TEST_EMBEDDINGS):
+#         print("LOTT embeddings already generated. Loading...")
+#         from lott_embeddings import load_lott_embeddings
+#         train_embeddings, test_embeddings, train_topics, test_topics = load_lott_embeddings()
+#     else:
+#         train_embeddings, test_embeddings, train_topics, test_topics = generate_and_save_lott_embeddings(
+#             bow_train, bow_test
+#         )
+    
+#     return train_embeddings, test_embeddings, train_topics, test_topics
+
+def step_5_generate_lott_embeddings(bow_all):
     print("\n" + "="*80)
     print("STEP 5: GENERATING LOTT EMBEDDINGS")
     print("="*80)
     
-    if check_file_exists(config.LOTT_TRAIN_EMBEDDINGS) and check_file_exists(config.LOTT_TEST_EMBEDDINGS):
+    if check_file_exists(config.LOTT_TRAIN_EMBEDDINGS):
         print("LOTT embeddings already generated. Loading...")
         from lott_embeddings import load_lott_embeddings
-        train_embeddings, test_embeddings, train_topics, test_topics = load_lott_embeddings()
+        all_embeddings = np.load(config.LOTT_TRAIN_EMBEDDINGS)
+        all_topics = np.load(config.TOPIC_PROPORTIONS_TRAIN)
     else:
-        train_embeddings, test_embeddings, train_topics, test_topics = generate_and_save_lott_embeddings(
-            bow_train, bow_test
-        )
+        all_embeddings, all_topics = generate_and_save_lott_embeddings(bow_all)
     
-    return train_embeddings, test_embeddings, train_topics, test_topics
+    return all_embeddings, all_topics
 
 
 def save_pipeline_metadata(train_doc_ids, test_doc_ids):

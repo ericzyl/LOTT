@@ -128,8 +128,80 @@ class LOTTEmbeddingGenerator:
         return embeddings, topic_proportions
 
 
-def generate_and_save_lott_embeddings(bow_train: np.ndarray, bow_test: np.ndarray):
-    # Generating and saving LOTT Embeddings for train and test sets
+# def generate_and_save_lott_embeddings(bow_train: np.ndarray, bow_test: np.ndarray):
+#     # Generating and saving LOTT Embeddings for train and test sets
+#     # Loading LDA Artifacts
+#     from lda_trainer import LDATrainer
+#     lda_model, topics, lda_centers, topic_cost_matrix = LDATrainer.load_artifacts()
+    
+#     # Initializing Generator
+#     generator = LOTTEmbeddingGenerator(
+#         lda_model=lda_model,
+#         lda_centers=lda_centers,
+#         topic_cost_matrix=topic_cost_matrix,
+#         gaussian_fwhm=config.GAUSSIAN_FWHM
+#     )
+    
+#     # Generating Train embeddings
+#     print("\n" + "="*80)
+#     print("GENERATING TRAINING LOTT EMBEDDINGS")
+#     print("="*80)
+#     train_embeddings, train_topics = generator.generate_from_bow(bow_train, show_progress=True)
+    
+#     # Saving Train Embeddings and Topics
+#     np.save(config.LOTT_TRAIN_EMBEDDINGS, train_embeddings)
+#     np.save(config.TOPIC_PROPORTIONS_TRAIN, train_topics)
+#     print(f"Saved train embeddings to {config.LOTT_TRAIN_EMBEDDINGS}")
+#     print(f"Shape: {train_embeddings.shape}")
+    
+#     # Generating Test Embeddings
+#     print("\n" + "="*80)
+#     print("GENERATING TEST LOTT EMBEDDINGS")
+#     print("="*80)
+#     test_embeddings, test_topics = generator.generate_from_bow(bow_test, show_progress=True)
+    
+#     # Saving Test Embeddings and Topics
+#     np.save(config.LOTT_TEST_EMBEDDINGS, test_embeddings)
+#     np.save(config.TOPIC_PROPORTIONS_TEST, test_topics)
+#     print(f"Saved test embeddings to {config.LOTT_TEST_EMBEDDINGS}")
+#     print(f"Shape: {test_embeddings.shape}")
+    
+#     return train_embeddings, test_embeddings, train_topics, test_topics
+
+    # # PCA Compression
+    # print("\nCompressing LOTT embeddings with PCA...")
+    # print(f"Original dimension: {train_embeddings.shape[1]}")
+    
+    # pca = PCA(n_components=384)  # Matching BERT dimension
+    # train_embeddings_compressed = pca.fit_transform(train_embeddings)
+    # test_embeddings_compressed = pca.transform(test_embeddings)
+    
+    # print(f"Compressed dimension: {train_embeddings_compressed.shape[1]}")
+    # print(f"Explained variance: {pca.explained_variance_ratio_.sum():.4f}")
+    
+    # # Saving Compressed Embeddings
+    # np.save(config.LOTT_TRAIN_EMBEDDINGS, train_embeddings_compressed)
+    # np.save(config.LOTT_TEST_EMBEDDINGS, test_embeddings_compressed)
+    
+    # # Also save the PCA model for query compression
+    # import pickle
+    # pca_path = config.MODELS_DIR / "lott_pca.pkl"
+    # with open(pca_path, 'wb') as f:
+    #     pickle.dump(pca, f)
+    # print(f"PCA model saved to {pca_path}")
+    
+    # # Save topic proportions
+    # np.save(config.TOPIC_PROPORTIONS_TRAIN, train_topics)
+    # np.save(config.TOPIC_PROPORTIONS_TEST, test_topics)
+    
+    # print(f"Saved train embeddings to {config.LOTT_TRAIN_EMBEDDINGS}")
+    # print(f"Shape: {train_embeddings_compressed.shape}")
+    # print(f"Saved test embeddings to {config.LOTT_TEST_EMBEDDINGS}")
+    # print(f"Shape: {test_embeddings_compressed.shape}")
+    
+    # return train_embeddings_compressed, test_embeddings_compressed, train_topics, test_topics
+
+def generate_and_save_lott_embeddings(bow_all: np.ndarray):
     # Loading LDA Artifacts
     from lda_trainer import LDATrainer
     lda_model, topics, lda_centers, topic_cost_matrix = LDATrainer.load_artifacts()
@@ -142,81 +214,42 @@ def generate_and_save_lott_embeddings(bow_train: np.ndarray, bow_test: np.ndarra
         gaussian_fwhm=config.GAUSSIAN_FWHM
     )
     
-    # Generating Train embeddings
+    # Generating Embeddings for all Documents
     print("\n" + "="*80)
-    print("GENERATING TRAINING LOTT EMBEDDINGS")
+    print("GENERATING LOTT EMBEDDINGS FOR ALL DOCUMENTS")
     print("="*80)
-    train_embeddings, train_topics = generator.generate_from_bow(bow_train, show_progress=True)
+    all_embeddings, all_topics = generator.generate_from_bow(bow_all, show_progress=True)
     
-    # # Saving Train Embeddings and Topics
-    # np.save(config.LOTT_TRAIN_EMBEDDINGS, train_embeddings)
-    # np.save(config.TOPIC_PROPORTIONS_TRAIN, train_topics)
-    # print(f"Saved train embeddings to {config.LOTT_TRAIN_EMBEDDINGS}")
-    # print(f"Shape: {train_embeddings.shape}")
+    # Saving Embeddings
+    np.save(config.LOTT_TRAIN_EMBEDDINGS, all_embeddings)
+    np.save(config.TOPIC_PROPORTIONS_TRAIN, all_topics)
+    print(f"Saved embeddings to {config.LOTT_TRAIN_EMBEDDINGS}")
+    print(f"Shape: {all_embeddings.shape}")
     
-    # Generating Test Embeddings
-    print("\n" + "="*80)
-    print("GENERATING TEST LOTT EMBEDDINGS")
-    print("="*80)
-    test_embeddings, test_topics = generator.generate_from_bow(bow_test, show_progress=True)
-    
-    # # Saving Test Embeddings and Topics
-    # np.save(config.LOTT_TEST_EMBEDDINGS, test_embeddings)
-    # np.save(config.TOPIC_PROPORTIONS_TEST, test_topics)
-    # print(f"Saved test embeddings to {config.LOTT_TEST_EMBEDDINGS}")
-    # print(f"Shape: {test_embeddings.shape}")
-    
-    # return train_embeddings, test_embeddings, train_topics, test_topics
-
-    # PCA Compression
-    print("\nCompressing LOTT embeddings with PCA...")
-    print(f"Original dimension: {train_embeddings.shape[1]}")
-    
-    pca = PCA(n_components=384)  # Matching BERT dimension
-    train_embeddings_compressed = pca.fit_transform(train_embeddings)
-    test_embeddings_compressed = pca.transform(test_embeddings)
-    
-    print(f"Compressed dimension: {train_embeddings_compressed.shape[1]}")
-    print(f"Explained variance: {pca.explained_variance_ratio_.sum():.4f}")
-    
-    # Saving Compressed Embeddings
-    np.save(config.LOTT_TRAIN_EMBEDDINGS, train_embeddings_compressed)
-    np.save(config.LOTT_TEST_EMBEDDINGS, test_embeddings_compressed)
-    
-    # Also save the PCA model for query compression
-    import pickle
-    pca_path = config.MODELS_DIR / "lott_pca.pkl"
-    with open(pca_path, 'wb') as f:
-        pickle.dump(pca, f)
-    print(f"PCA model saved to {pca_path}")
-    
-    # Save topic proportions
-    np.save(config.TOPIC_PROPORTIONS_TRAIN, train_topics)
-    np.save(config.TOPIC_PROPORTIONS_TEST, test_topics)
-    
-    print(f"Saved train embeddings to {config.LOTT_TRAIN_EMBEDDINGS}")
-    print(f"Shape: {train_embeddings_compressed.shape}")
-    print(f"Saved test embeddings to {config.LOTT_TEST_EMBEDDINGS}")
-    print(f"Shape: {test_embeddings_compressed.shape}")
-    
-    return train_embeddings_compressed, test_embeddings_compressed, train_topics, test_topics
-
+    return all_embeddings, all_topics
 
 def load_lott_embeddings():
     # Loading saved LOTT embeddings
     print("Loading LOTT embeddings...")
     
-    train_embeddings = np.load(config.LOTT_TRAIN_EMBEDDINGS)
-    test_embeddings = np.load(config.LOTT_TEST_EMBEDDINGS)
-    train_topics = np.load(config.TOPIC_PROPORTIONS_TRAIN)
-    test_topics = np.load(config.TOPIC_PROPORTIONS_TEST)
+    # train_embeddings = np.load(config.LOTT_TRAIN_EMBEDDINGS)
+    # test_embeddings = np.load(config.LOTT_TEST_EMBEDDINGS)
+    # train_topics = np.load(config.TOPIC_PROPORTIONS_TRAIN)
+    # test_topics = np.load(config.TOPIC_PROPORTIONS_TEST)
+
+    all_embeddings = np.load(config.LOTT_TRAIN_EMBEDDINGS)
+    all_topics = np.load(config.TOPIC_PROPORTIONS_TRAIN)
     
-    print(f"Loaded train embeddings: {train_embeddings.shape}")
-    print(f"Loaded test embeddings: {test_embeddings.shape}")
-    print(f"Loaded train topics: {train_topics.shape}")
-    print(f"Loaded test topics: {test_topics.shape}")
+    # print(f"Loaded train embeddings: {train_embeddings.shape}")
+    # print(f"Loaded test embeddings: {test_embeddings.shape}")
+    # print(f"Loaded train topics: {train_topics.shape}")
+    # print(f"Loaded test topics: {test_topics.shape}")
+
+    print(f"Loaded all embeddings: {all_embeddings.shape}")
+    print(f"Loaded all topics: {all_topics.shape}")
     
-    return train_embeddings, test_embeddings, train_topics, test_topics
+    # return train_embeddings, test_embeddings, train_topics, test_topics
+    return all_embeddings, all_topics
 
 
 if __name__ == "__main__":
