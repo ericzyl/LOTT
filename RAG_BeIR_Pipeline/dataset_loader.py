@@ -146,11 +146,14 @@ class TRECCovidLoader:
         # Saving Processed Data to Disk
         print("Saving processed data...")
         
-        with open(config.DOCUMENTS_TRAIN_PATH, 'wb') as f:
-            pickle.dump(train_corpus, f)
+        # with open(config.DOCUMENTS_TRAIN_PATH, 'wb') as f:
+        #     pickle.dump(train_corpus, f)
         
-        with open(config.DOCUMENTS_TEST_PATH, 'wb') as f:
-            pickle.dump(test_corpus, f)
+        with open(config.DOCUMENTS_TRAIN_PATH, 'wb') as f:
+            pickle.dump(self.corpus, f)
+        
+        # with open(config.DOCUMENTS_TEST_PATH, 'wb') as f:
+        #     pickle.dump(test_corpus, f)
         
         with open(config.QUERIES_PATH, 'wb') as f:
             pickle.dump(self.queries, f)
