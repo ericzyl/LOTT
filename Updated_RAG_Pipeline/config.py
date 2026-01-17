@@ -28,8 +28,8 @@ GLOVE_DIM = 300
 # LDA configuration
 N_TOPICS = 100  # Number of topics for LDA
 N_TOP_WORDS = 20  # Keep top N words per topic for sparse representation
-# LDA_ITERATIONS = 1500
-LDA_ITERATIONS = 5
+LDA_ITERATIONS = 1500
+# LDA_ITERATIONS = 5
 LDA_RANDOM_STATE = 42
 
 # LOTT configuration
