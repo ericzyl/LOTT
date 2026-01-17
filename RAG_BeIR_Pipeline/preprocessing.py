@@ -74,20 +74,58 @@ class TextPreprocessor:
         print(f"Total unique words before filtering: {len(word_counts)}")
         
         # Loading GloVe embeddings
+        # print(f"Loading GloVe embeddings from {glove_path}...")
+        # glove_embeddings = {}
+        
+        # with open(glove_path, 'r', encoding='utf-8') as f:
+        #     # for line in tqdm(f, desc="Loading GloVe"):
+        #     lines = f.readlines()
+        #     total_lines = len(lines)
+        #     for idx, line in enumerate(lines):
+        #         if idx % 50000 == 0:
+        #             print(f"  Loaded {idx}/{total_lines} embeddings")
+        #         parts = line.strip().split()
+        #         word = parts[0]
+        #         embedding = np.array([float(x) for x in parts[1:]])
+        #         glove_embeddings[word] = embedding
         print(f"Loading GloVe embeddings from {glove_path}...")
         glove_embeddings = {}
-        
+
         with open(glove_path, 'r', encoding='utf-8') as f:
-            # for line in tqdm(f, desc="Loading GloVe"):
             lines = f.readlines()
             total_lines = len(lines)
             for idx, line in enumerate(lines):
                 if idx % 50000 == 0:
                     print(f"  Loaded {idx}/{total_lines} embeddings")
-                parts = line.strip().split()
-                word = parts[0]
-                embedding = np.array([float(x) for x in parts[1:]])
-                glove_embeddings[word] = embedding
+                
+                try:
+                    parts = line.strip().split()
+                    
+                    # Skipping Empty lines
+                    if len(parts) < 2:
+                        continue
+                    
+                    word = parts[0]
+                    
+                    # Trying to convert remaining parts to floats
+                    # Skipping the line if any part can't be converted
+                    try:
+                        embedding = np.array([float(x) for x in parts[1:]])
+                    except ValueError:
+                        # Skipping malformed lines
+                        continue
+                    
+                    # Sanity check: embedding should have expected dimension
+                    if len(embedding) != config.GLOVE_DIM:
+                        continue
+                    
+                    glove_embeddings[word] = embedding
+                    
+                except Exception as e:
+                    # Skipping any problematic lines
+                    if idx < 10:  # Printing first few errors for debugging
+                        print(f"  Warning: Skipping line {idx}: {e}")
+                    continue
         
         print(f"Loaded {len(glove_embeddings)} GloVe embeddings")
         
