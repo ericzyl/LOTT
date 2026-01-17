@@ -8,6 +8,7 @@ from pathlib import Path
 # Base directories
 PROJECT_ROOT = Path(__file__).parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
+SAVE_DATA_DIR = PROJECT_ROOT / "Easy_Dataset_RAG_Pipeline/data"
 MODELS_DIR = PROJECT_ROOT / "Easy_Dataset_RAG_Pipeline/models"
 EMBEDDINGS_DIR = PROJECT_ROOT / "Easy_Dataset_RAG_Pipeline/embeddings"
 RESULTS_DIR = PROJECT_ROOT / "Easy_Dataset_RAG_Pipeline/results"
@@ -61,9 +62,9 @@ BERT_FAISS_INDEX = FAISS_INDEX_DIR / "bert_index.faiss"
 LOTT_FAISS_INDEX = FAISS_INDEX_DIR / "lott_index.faiss"
 
 # Document store paths
-DOCUMENTS_PATH = DATA_DIR / "Easy_Dataset_RAG_Pipeline/documents.pkl"  # Single corpus, no split
-QUERIES_PATH = DATA_DIR / "Easy_Dataset_RAG_Pipeline/queries.pkl"
-QRELS_PATH = DATA_DIR / "Easy_Dataset_RAG_Pipeline/qrels.pkl"
+DOCUMENTS_PATH = SAVE_DATA_DIR / "documents.pkl"  # Single corpus, no split
+QUERIES_PATH = SAVE_DATA_DIR / "queries.pkl"
+QRELS_PATH = SAVE_DATA_DIR / "qrels.pkl"
 
 # Results paths
 METRICS_RESULTS_PATH = RESULTS_DIR / "evaluation_metrics.json"
