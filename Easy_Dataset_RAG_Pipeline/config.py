@@ -15,7 +15,7 @@ RESULTS_DIR = PROJECT_ROOT / "Easy_Dataset_RAG_Pipeline/results"
 FAISS_INDEX_DIR = PROJECT_ROOT / "Easy_Dataset_RAG_Pipeline/faiss_indices"
 
 # Create directories if they don't exist
-for dir_path in [DATA_DIR, MODELS_DIR, EMBEDDINGS_DIR, RESULTS_DIR, FAISS_INDEX_DIR]:
+for dir_path in [DATA_DIR, SAVE_DATA_DIR, MODELS_DIR, EMBEDDINGS_DIR, RESULTS_DIR, FAISS_INDEX_DIR]:
     dir_path.mkdir(exist_ok=True, parents=True)
 
 # Dataset configuration
