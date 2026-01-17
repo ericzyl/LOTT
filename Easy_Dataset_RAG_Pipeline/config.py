@@ -20,7 +20,7 @@ for dir_path in [DATA_DIR, SAVE_DATA_DIR, MODELS_DIR, EMBEDDINGS_DIR, RESULTS_DI
 
 # Dataset configuration
 DATASET_NAME = "MS-MARCO"
-MAX_DOCS = 1000  # Set to None for full dataset (8.8M), or number for testing (e.g., 100000)
+MAX_DOCS = None  # Set to None for full dataset (8.8M), or number for testing (e.g., 100000)
 
 # GloVe embeddings
 GLOVE_PATH = DATA_DIR / "wiki_giga_2024_300_MFT20_vectors_seed_2024_alpha_0.75_eta_0.05_combined.txt"
@@ -29,7 +29,7 @@ GLOVE_DIM = 300
 # LDA configuration
 N_TOPICS = 100  # Number of topics for LDA
 N_TOP_WORDS = 20  # Keep top N words per topic for sparse representation
-LDA_ITERATIONS = 1  # Reduced from 1500 (MS MARCO has shorter docs)
+LDA_ITERATIONS = 1000  # Reduced from 1500 (MS MARCO has shorter docs)
 LDA_RANDOM_STATE = 42
 
 # LOTT configuration
