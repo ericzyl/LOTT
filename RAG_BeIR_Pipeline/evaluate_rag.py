@@ -316,7 +316,6 @@ def run_full_evaluation():
     print("="*80)
     
     # Loading train doc IDs
-    import pickle
     with open(config.DATA_DIR / 'pipeline_metadata.pkl', 'rb') as f:
         metadata = pickle.load(f)
     train_doc_ids = metadata['train_doc_ids']
