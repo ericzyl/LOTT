@@ -127,11 +127,11 @@ def load_bert_embeddings():
 
 if __name__ == "__main__":
     import pickle
-    from dataset_loader import TRECCovidLoader
+    from dataset_loader import MSMARCOLoader
     
     # Load corpus
     print("Loading corpus...")
-    corpus, queries, _ = TRECCovidLoader.load_saved_data()
+    corpus, queries, _ = MSMARCOLoader.load_saved_data()
     
     # Use all document IDs in corpus order
     doc_ids = list(corpus.keys())
