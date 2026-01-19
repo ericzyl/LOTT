@@ -31,8 +31,10 @@ def run_pipeline():
     print_section("STEP 1/5: Running Complete Pipeline")
     
     from pipeline import run_full_pipeline
+    import config
     
     try:
+        print(f'LDA Iterations: {config.LDA_ITERATIONS}')
         pipeline_data = run_full_pipeline()
         print("✓ Pipeline completed successfully!")
         return True
