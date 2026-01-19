@@ -242,12 +242,12 @@ def train_and_save_lda(bow_train: np.ndarray, embeddings: np.ndarray, vocab: lis
 
 
 if __name__ == "__main__":
-    from dataset_loader import TRECCovidLoader
+    from dataset_loader import MSMARCOLoader
     from preprocessing import prepare_bow_data
     
     # Load data
     print("Loading data...")
-    corpus, _, _ = TRECCovidLoader.load_saved_data()
+    corpus, _, _ = MSMARCOLoader.load_saved_data()
     
     # Prepare BoW data
     bow_data, vocab, embeddings, _ = prepare_bow_data(corpus)
