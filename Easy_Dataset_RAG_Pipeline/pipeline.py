@@ -23,6 +23,8 @@ def step_1_load_dataset():
     print("\n" + "="*80)
     print("STEP 1: LOADING DATASET")
     print("="*80)
+
+    print(f'LDA Iterations: {config.LDA_ITERATIONS}')
     
     if check_file_exists(config.DOCUMENTS_PATH):
         print("Dataset already loaded. Skipping...")
