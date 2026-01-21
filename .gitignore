@@ -1,5 +1,6 @@
 # Data and Embeddings
 data/
+Raw_Datasets/
 
 # Pycache files
 __pycache__/
