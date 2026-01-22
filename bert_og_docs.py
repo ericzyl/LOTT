@@ -24,36 +24,84 @@ def load_raw_text_dataset(file_path):
     
     print(f"Loading dataset from {file_path}...")
     
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, 'r', encoding='latin-1') as f:
         for line in f:
             line = line.strip()
             if not line:
                 continue
             
-            # Splitting lines in file by tab
-            parts = line.split('\t', 1)
+            # First word/token is label, rest is document text
+            parts = line.split(None, 1)
             if len(parts) != 2:
                 continue
             
             label, text = parts
+            # Remove quotes from labels if present
+            label = label.strip('"')
             
             # Minimal preprocessing- just cleaning up white spaces
             text = basic_text_cleanup(text)
             
             texts.append(text)
-            labels.append(int(label))
+            labels.append(label)
     
-    labels = np.array(labels)
-    print(f"Loaded {len(texts)} documents with {len(np.unique(labels))} unique labels")
+    # Convert string labels to integer indices
+    unique_labels = sorted(set(labels))
+    label_to_idx = {label: idx for idx, label in enumerate(unique_labels)}
+    labels_int = np.array([label_to_idx[label] for label in labels])
     
-    return texts, labels
+    print(f"Loaded {len(texts)} documents with {len(unique_labels)} unique labels")
+    
+    return texts, labels_int
 
 
 def load_dataset_with_splits(train_file, test_file):
-    X_train, y_train = load_raw_text_dataset(train_file)
-    X_test, y_test = load_raw_text_dataset(test_file)
+    texts_train = []
+    labels_train = []
+    texts_test = []
+    labels_test = []
     
-    return X_train, X_test, y_train, y_test
+    print(f"Loading training data from {train_file}...")
+    with open(train_file, 'r', encoding='latin-1') as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            parts = line.split(None, 1)
+            if len(parts) != 2:
+                continue
+            label, text = parts
+            label = label.strip('"')
+            text = basic_text_cleanup(text)
+            texts_train.append(text)
+            labels_train.append(label)
+    
+    print(f"Loading test data from {test_file}...")
+    with open(test_file, 'r', encoding='latin-1') as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            parts = line.split(None, 1)
+            if len(parts) != 2:
+                continue
+            label, text = parts
+            label = label.strip('"')
+            text = basic_text_cleanup(text)
+            texts_test.append(text)
+            labels_test.append(label)
+    
+    # Create unified label mapping from both train and test
+    all_labels = sorted(set(labels_train + labels_test))
+    label_to_idx = {label: idx for idx, label in enumerate(all_labels)}
+    
+    y_train = np.array([label_to_idx[label] for label in labels_train])
+    y_test = np.array([label_to_idx[label] for label in labels_test])
+    
+    print(f"Train: {len(texts_train)} documents, Test: {len(texts_test)} documents")
+    print(f"Total unique labels: {len(all_labels)}")
+    
+    return texts_train, texts_test, y_train, y_test
 
 
 # BERT Model Configs
@@ -73,7 +121,7 @@ DATA_DIR = './Raw_Datasets/'
 # has_splits=False means single file needs to be split
 DATASET_CONFIGS = {
     'bbcsport': {
-        'file': DATA_DIR + 'bbcsport_by_line.txt',
+        'file': DATA_DIR + 'all_bbcsport_by_line.txt',
         'has_splits': False
     },
     'twitter': {
@@ -81,26 +129,33 @@ DATASET_CONFIGS = {
         'has_splits': False
     },
     'amazon': {
-        'file': DATA_DIR + 'amazon_by_line.txt',
+        'file': DATA_DIR + 'all_amazon_by_line.txt',
         'has_splits': False
     },
     'classic': {
-        'file': DATA_DIR + 'classic_by_line.txt',
+        'file': DATA_DIR + 'all_classic.txt',
         'has_splits': False
     },
-    'reuters': {
-        'train_file': DATA_DIR + 'r8-train-all-terms.txt',
-        'test_file': DATA_DIR + 'r8-test-all-terms.txt',
+    # Link to download not working currently
+    # 'reuters': {
+    #     'train_file': DATA_DIR + 'r8-train-all-terms.txt',
+    #     'test_file': DATA_DIR + 'r8-test-all-terms.txt',
+    #     'has_splits': True
+    # },
+    # 'ohsumed': {
+    #     'file': DATA_DIR + 'ohsumed_by_line.txt',
+    #     'has_splits': False,
+    #     'first_n_classes': 10  # Using only first 10 classes for ohsumed dataset according to original WMD paper
+    # },
+    'ohsumed': {
+        'train_file': DATA_DIR + 'train_ohsumed_by_line.txt',
+        'test_file': DATA_DIR + 'test_ohsumed_by_line.txt',
         'has_splits': True
     },
-    'ohsumed': {
-        'file': DATA_DIR + 'ohsumed_by_line.txt',
-        'has_splits': False,
-        'first_n_classes': 10  # Using only first 10 classes for ohsumed dataset according to original WMD paper
-    },
     '20news': {
-        'file': DATA_DIR + '20ng_by_line.txt',
-        'has_splits': False
+        'train_file': DATA_DIR + '20ng-train-all-terms.txt',
+        'test_file': DATA_DIR + '20ng-test-all-terms.txt',
+        'has_splits': True
     }
 }
 
@@ -137,14 +192,14 @@ if __name__ == "__main__":
                 # Loading single file and splitting
                 texts, labels = load_raw_text_dataset(config['file'])
                 
-                # Handling special dataset preprocessing
-                if dataset_name == 'ohsumed' and 'first_n_classes' in config:
-                    # Keeping only first N classes
-                    n_classes = config['first_n_classes']
-                    mask = labels < n_classes
-                    texts = [t for i, t in enumerate(texts) if mask[i]]
-                    labels = labels[mask]
-                    print(f"Filtered to first {n_classes} classes: {len(texts)} documents")
+                # # Handling special dataset preprocessing
+                # if dataset_name == 'ohsumed' and 'first_n_classes' in config:
+                #     # Keeping only first N classes
+                #     n_classes = config['first_n_classes']
+                #     mask = labels < n_classes
+                #     texts = [t for i, t in enumerate(texts) if mask[i]]
+                #     labels = labels[mask]
+                #     print(f"Filtered to first {n_classes} classes: {len(texts)} documents")
                 
                 X_train, X_test, y_train, y_test = train_test_split(
                     texts, labels, 
