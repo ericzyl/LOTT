@@ -27,6 +27,7 @@ data_path = './data/'
 # https://nlp.stanford.edu/projects/glove/
 # and put them into
 embeddings_path = './data/wiki_giga_2024_300_MFT20_vectors_seed_2024_alpha_0.75_eta_0.05_combined.txt'
+# Changed Embeddings to latest GloVe embeddings for better results
 
 # Pick a dataset (uncomment the line you want)
 # data_name = 'bbcsport-emd_tr_te_split.mat'
