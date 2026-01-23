@@ -29,11 +29,11 @@ data_path = './data/'
 embeddings_path = './data/glove.6B/glove.6B.300d.txt'
 
 # Pick a dataset (uncomment the line you want)
-data_name = 'bbcsport-emd_tr_te_split.mat'
+# data_name = 'bbcsport-emd_tr_te_split.mat'
 # data_name = 'twitter-emd_tr_te_split.mat'
 # data_name = 'r8-emd_tr_te3.mat'
 # data_name = 'amazon-emd_tr_te_split.mat'
-# data_name = 'classic-emd_tr_te_split.mat'
+data_name = 'classic-emd_tr_te_split.mat'
 # data_name = 'ohsumed-emd_tr_te_ix.mat'
 
 # data_name = '20ng2_500-emd_tr_te.mat'
@@ -70,18 +70,18 @@ bow_train, bow_test, topic_train, topic_test, y_train, y_test = train_test_split
 # Pick a method among RWMD, WMD, WMD-T20, HOTT, HOFTT
 methods = {
         'LOTT': lot.lot,
-           'HOTT': hott.hott,
-           'HOFTT': hott.hoftt,
-           'WMD-T20': lambda p, q, C: distances.wmd(p, q, C, truncate=20),
-           'RWMD': distances.rwmd,
-           'WMD': distances.wmd,
-           # BERT Methods
-           'SBERT': None,
-           'SBERT-large': None,
-           'DistilBERT': None,
-           'RoBERTa': None,
-           'BERT': None
-           }
+        # 'HOTT': hott.hott,
+        # 'HOFTT': hott.hoftt,
+        # 'WMD-T20': lambda p, q, C: distances.wmd(p, q, C, truncate=20),
+        # 'RWMD': distances.rwmd,
+        # 'WMD': distances.wmd,
+        # # BERT Methods
+        # 'SBERT': None,
+        # 'SBERT-large': None,
+        # 'DistilBERT': None,
+        # 'RoBERTa': None,
+        # 'BERT': None
+        }
     
 vocab = data['vocab'] # Vocabulary obtained from Data Object
 

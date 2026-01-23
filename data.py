@@ -1,5 +1,5 @@
 import numpy as np
-import lda
+# import lda
 from hott import sparse_ot
 
 from sklearn.metrics.pairwise import euclidean_distances
@@ -7,6 +7,7 @@ from scipy.io import loadmat
 from nltk.corpus import stopwords
 from nltk.stem.snowball import SnowballStemmer
 from sklearn.manifold import MDS
+from sklearn.decomposition import LatentDirichletAllocation
 
 
 def load_wmd_data(path):
@@ -146,20 +147,51 @@ def change_embeddings(vocab, bow_data, embed_path):
     return new_vocab, data_embed_vocab, bow_data
 
 
+# def fit_topics(data, embeddings, vocab, K):
+#     """Fit a topic model to bag-of-words data."""
+#     model = lda.LDA(n_topics=K, n_iter=1500, random_state=1)
+#     model.fit(data)
+#     topics = model.topic_word_
+#     lda_centers = np.matmul(topics, embeddings)
+#     print('LDA Gibbs topics')
+#     n_top_words = 20
+#     for i, topic_dist in enumerate(topics):
+#         topic_words = np.array(vocab)[np.argsort(topic_dist)][:-(n_top_words + 1):-1]
+#         print('Topic {}: {}'.format(i, ' '.join(topic_words)))
+#     print('\n')
+#     topic_proportions = model.doc_topic_
+
+#     return topics, lda_centers, topic_proportions
+
 def fit_topics(data, embeddings, vocab, K):
-    """Fit a topic model to bag-of-words data."""
-    model = lda.LDA(n_topics=K, n_iter=1500, random_state=1)
+    """Fit a topic model with convergence checking."""
+    model = LatentDirichletAllocation(
+        n_components=K,
+        max_iter=5000,
+        random_state=1,
+        evaluate_every=10,  # Check every 10 iterations
+        perp_tol=1e-7,      # Convergence tolerance
+        verbose=1,          # Shows progress and convergence
+        n_jobs=-1           # Multi-threaded!
+    )
+    
     model.fit(data)
-    topics = model.topic_word_
+    
+    topics = model.components_
+    topics = topics / topics.sum(axis=1, keepdims=True)  # Normalize
+    
     lda_centers = np.matmul(topics, embeddings)
-    print('LDA Gibbs topics')
+    
+    # Print topics
+    print('LDA topics')
     n_top_words = 20
     for i, topic_dist in enumerate(topics):
         topic_words = np.array(vocab)[np.argsort(topic_dist)][:-(n_top_words + 1):-1]
         print('Topic {}: {}'.format(i, ' '.join(topic_words)))
     print('\n')
-    topic_proportions = model.doc_topic_
-
+    
+    topic_proportions = model.transform(data)
+    
     return topics, lda_centers, topic_proportions
 
 def loader(data_path,
