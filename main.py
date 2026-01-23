@@ -26,7 +26,7 @@ data_path = './data/'
 # Download GloVe 6B tokens, 300d word embeddings from
 # https://nlp.stanford.edu/projects/glove/
 # and put them into
-embeddings_path = './data/glove.6B/glove.6B.300d.txt'
+embeddings_path = './data/wiki_giga_2024_300_MFT20_vectors_seed_2024_alpha_0.75_eta_0.05_combined.txt'
 
 # Pick a dataset (uncomment the line you want)
 # data_name = 'bbcsport-emd_tr_te_split.mat'
