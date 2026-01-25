@@ -167,7 +167,7 @@ def fit_topics(data, embeddings, vocab, K):
     """Fit a topic model with convergence checking."""
     model = LatentDirichletAllocation(
         n_components=K,
-        max_iter=5000,
+        max_iter=1500,
         random_state=1,
         evaluate_every=10,  # Check every 10 iterations
         perp_tol=1e-5,      # Convergence tolerance
