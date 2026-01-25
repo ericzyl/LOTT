@@ -128,7 +128,15 @@ for method in methods.keys():
     elif method in ['LOTT']:
         # create lot embedding
         #bimodal_vector = lot.makeBimodal1D(size=topic_train.shape[1], fwhm1=10, center1=20, fwhm2=5, center2=80)
-        gaussian_vector = lot.makeGaussian1D(size=topic_train.shape[1], fwhm=10)
+        size = 70  # Length of the output vector
+        num_modal = 10
+        fwhms = [10] * num_modal
+        #centers = np.linspace(0, size-1, num_modal, dtype=int)
+        if num_modal == 1:
+            centers = [size // 2]  # Single center at the middle of the vector
+        else:
+            centers = [(i + 1) * size // (num_modal + 1) for i in range(num_modal)]
+        gaussian_vector = lot.makeGaussian1D(size=topic_train.shape[1], fwhms=fwhms, centers=centers)
         X_train_lot = lot.create_lot_embeddings(topic_train, gaussian_vector, lda_centers, cost_T)
         X_test_lot = lot.create_lot_embeddings(topic_test, gaussian_vector, lda_centers, cost_T)
 

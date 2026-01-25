@@ -1,23 +1,47 @@
 import ot
 import numpy as np
 
-def makeGaussian1D(size, fwhm=3, center=None):
+# def makeGaussian1D(size, fwhm=3, center=None):
+#     """
+#     Generate a 1D Gaussian distribution.
+
+#     size: Length of the output vector.
+#     fwhm: Full-Width-Half-Maximum, defines the width of the Gaussian.
+#     center: Center of the Gaussian (if None, it will be centered in the middle of the vector).
+#     """
+#     # If center is not specified, default to the middle of the vector
+#     center = center if center is not None else size // 2
+
+#     # Generate the Gaussian distribution
+#     x = np.arange(size)
+#     gaussian = np.exp(-4 * np.log(2) * ((x - center)**2) / fwhm**2)
+    
+#     # Normalize the Gaussian distribution
+#     return gaussian / gaussian.sum()
+
+def makeGaussian1D(size, fwhms, centers=None):
     """
-    Generate a 1D Gaussian distribution.
+    Generate a 1D Gaussian mixture distribution with multiple modes.
 
     size: Length of the output vector.
-    fwhm: Full-Width-Half-Maximum, defines the width of the Gaussian.
-    center: Center of the Gaussian (if None, it will be centered in the middle of the vector).
+    fwhms: List of Full-Width-Half-Maximum values for each Gaussian.
+    centers: List of centers for each Gaussian (if None, the modes will be spread evenly across the vector).
     """
-    # If center is not specified, default to the middle of the vector
-    center = center if center is not None else size // 2
+    # If centers are not specified, evenly space them across the vector
+    if centers is None:
+        centers = np.linspace(0, size - 1, len(fwhms), dtype=int)
 
-    # Generate the Gaussian distribution
-    x = np.arange(size)
-    gaussian = np.exp(-4 * np.log(2) * ((x - center)**2) / fwhm**2)
-    
-    # Normalize the Gaussian distribution
-    return gaussian / gaussian.sum()
+    # Initialize the Gaussian mixture
+    gaussian_mixture = np.zeros(size)
+
+    # Loop through each Gaussian and add it to the mixture
+    for fwhm, center in zip(fwhms, centers):
+        x = np.arange(size)
+        gaussian = np.exp(-4 * np.log(2) * ((x - center)**2) / fwhm**2)
+        gaussian_mixture += gaussian
+
+    # Normalize the mixture so that it sums to 1
+    return gaussian_mixture / gaussian_mixture.sum()
 
 
 def makeBimodal1D(size, fwhm1=3, center1=None, fwhm2=3, center2=None):
