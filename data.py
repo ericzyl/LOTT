@@ -170,7 +170,7 @@ def fit_topics(data, embeddings, vocab, K):
         max_iter=5000,
         random_state=1,
         evaluate_every=10,  # Check every 10 iterations
-        perp_tol=1e-15,      # Convergence tolerance
+        perp_tol=1e-5,      # Convergence tolerance
         verbose=1,          # Shows progress and convergence
         n_jobs=1           # Multi-threaded!
     )

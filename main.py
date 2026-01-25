@@ -30,11 +30,11 @@ embeddings_path = './data/wiki_giga_2024_300_MFT20_vectors_seed_2024_alpha_0.75_
 # Changed Embeddings to latest GloVe embeddings for better results
 
 # Pick a dataset (uncomment the line you want)
-# data_name = 'bbcsport-emd_tr_te_split.mat'
+data_name = 'bbcsport-emd_tr_te_split.mat'
 # data_name = 'twitter-emd_tr_te_split.mat'
 # data_name = 'r8-emd_tr_te3.mat'
 # data_name = 'amazon-emd_tr_te_split.mat'
-data_name = 'classic-emd_tr_te_split.mat'
+# data_name = 'classic-emd_tr_te_split.mat'
 # data_name = 'ohsumed-emd_tr_te_ix.mat'
 
 # data_name = '20ng2_500-emd_tr_te.mat'
@@ -128,7 +128,7 @@ for method in methods.keys():
     elif method in ['LOTT']:
         # create lot embedding
         #bimodal_vector = lot.makeBimodal1D(size=topic_train.shape[1], fwhm1=10, center1=20, fwhm2=5, center2=80)
-        gaussian_vector = lot.makeGaussian1D(size=topic_train.shape[1], fwhm=25)
+        gaussian_vector = lot.makeGaussian1D(size=topic_train.shape[1], fwhm=10)
         X_train_lot = lot.create_lot_embeddings(topic_train, gaussian_vector, lda_centers, cost_T)
         X_test_lot = lot.create_lot_embeddings(topic_test, gaussian_vector, lda_centers, cost_T)
 
