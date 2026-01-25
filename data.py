@@ -172,7 +172,7 @@ def fit_topics(data, embeddings, vocab, K):
         evaluate_every=10,  # Check every 10 iterations
         perp_tol=1e-15,      # Convergence tolerance
         verbose=1,          # Shows progress and convergence
-        n_jobs=-1           # Multi-threaded!
+        n_jobs=16           # Multi-threaded!
     )
     
     model.fit(data)
