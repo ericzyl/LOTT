@@ -1,5 +1,5 @@
 import numpy as np
-# import lda
+import lda
 from hott import sparse_ot
 
 from sklearn.metrics.pairwise import euclidean_distances
