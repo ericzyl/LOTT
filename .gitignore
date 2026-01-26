@@ -11,3 +11,7 @@ __pycache__/
 # RAG Pipeline Generated Folders
 RAG_BeIR_Pipeline/*
 !RAG_BeIR_Pipeline/*.py
+
+# Hybrid RAG Generated Folders
+Hybriid_RAG/*
+!Hybrid_RAG/*.py
