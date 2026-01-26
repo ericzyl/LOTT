@@ -49,6 +49,8 @@ class LDAModule:
             n_components=config.N_TOPICS,
             max_iter=config.LDA_MAX_ITER,
             random_state=config.LDA_RANDOM_STATE,
+            evaluate_every=10,
+            perp_tol=1e-3,
             n_jobs=2,
             verbose=1
         )
