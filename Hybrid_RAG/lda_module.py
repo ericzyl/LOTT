@@ -51,7 +51,7 @@ class LDAModule:
             random_state=config.LDA_RANDOM_STATE,
             evaluate_every=10,
             perp_tol=1e-3,
-            n_jobs=2,
+            n_jobs=1,
             verbose=1
         )
         
