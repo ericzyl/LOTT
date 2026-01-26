@@ -29,7 +29,7 @@ BERT_DIM = 384
 # LDA configuration
 N_TOPICS = 100
 N_TOP_WORDS = 20  # Sparse topics
-LDA_MAX_ITER = 1000
+LDA_MAX_ITER = 1500
 LDA_RANDOM_STATE = 42
 
 # Retrieval configuration
