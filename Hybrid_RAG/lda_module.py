@@ -131,7 +131,7 @@ class LDAModule:
     def _save_to_cache(self):
         """Save LDA artifacts to cache"""
         print("Caching LDA artifacts...")
-        with open(self.cache['lda_model'], 'rb') as f:
+        with open(self.cache['lda_model'], 'wb') as f:
             pickle.dump(self.model, f)
         np.save(self.cache['lda_topics'], self.topics)
         np.save(self.cache['lda_centers'], self.lda_centers)
