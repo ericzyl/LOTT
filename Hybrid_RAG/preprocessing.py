@@ -1,0 +1,247 @@
+"""
+Text preprocessing for BoW representation
+COPY THE TEXTPREPROCESSOR CLASS FROM YOUR PREVIOUS preprocessing.py
+Then use the functions below
+"""
+import numpy as np
+import pickle
+from typing import Dict, List, Tuple
+import re
+from collections import Counter
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+import nltk
+import config
+
+# Ensure NLTK data
+try:
+    nltk.data.find('corpora/stopwords')
+except LookupError:
+    nltk.download('stopwords', quiet=True)
+try:
+    nltk.data.find('corpora/wordnet')
+except LookupError:
+    nltk.download('wordnet', quiet=True)
+
+
+class TextPreprocessor:
+    """Handles text preprocessing for BoW representation"""
+    
+    def __init__(self, min_word_length=3, max_vocab_size=10000):
+        self.min_word_length = min_word_length
+        self.max_vocab_size = max_vocab_size
+        self.stop_words = set(stopwords.words('english'))
+        self.lemmatizer = WordNetLemmatizer()
+        self.vocab = None
+        self.word_to_idx = None
+        
+    def tokenize(self, text: str) -> List[str]:
+        """Tokenize and clean text"""
+        # Lowercase
+        text = text.lower()
+        
+        # Remove special characters and digits
+        text = re.sub(r'[^a-z\s]', ' ', text)
+        
+        # Split into words
+        words = text.split()
+        
+        # Filter by length and stop words
+        words = [w for w in words if len(w) >= self.min_word_length and w not in self.stop_words]
+        
+        # Lemmatize
+        words = [self.lemmatizer.lemmatize(w) for w in words]
+        
+        return words
+    
+    def build_vocabulary(self, corpus: Dict[str, Dict], glove_path: str) -> Tuple[List[str], Dict[str, np.ndarray]]:
+        """Build vocabulary from corpus and load GloVe embeddings"""
+        print("Building vocabulary...")
+        
+        # Count word frequencies
+        word_counts = Counter()
+        print("Counting words in corpus...")
+        for idx, (doc_id, doc_data) in enumerate(corpus.items()):
+            if idx % 5000 == 0:
+                print(f"  Processed {idx}/{len(corpus)} documents")
+            words = self.tokenize(doc_data['text'])
+            word_counts.update(words)
+        
+        print(f"Total unique words before filtering: {len(word_counts)}")
+        
+        # Load GloVe embeddings
+        print(f"Loading GloVe embeddings from {glove_path}...")
+        glove_embeddings = {}
+        
+        with open(glove_path, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+            total_lines = len(lines)
+            for idx, line in enumerate(lines):
+                if idx % 50000 == 0:
+                    print(f"  Loaded {idx}/{total_lines} embeddings")
+                try:
+                    parts = line.strip().split()
+                    
+                    # Skipping Empty lines
+                    if len(parts) < 2:
+                        continue
+                    
+                    word = parts[0]
+                    
+                    # Trying to convert remaining parts to floats
+                    # Skipping the line if any part can't be converted
+                    try:
+                        embedding = np.array([float(x) for x in parts[1:]])
+                    except ValueError:
+                        # Skipping malformed lines
+                        continue
+                    
+                    # Sanity check: embedding should have expected dimension
+                    if len(embedding) != config.GLOVE_DIM:
+                        continue
+                    
+                    glove_embeddings[word] = embedding
+                    
+                except Exception as e:
+                    # Skipping any problematic lines
+                    if idx < 10:  # Printing first few errors for debugging
+                        print(f"  Warning: Skipping line {idx}: {e}")
+                    continue
+        
+        print(f"Loaded {len(glove_embeddings)} GloVe embeddings")
+        
+        # Keep only words that exist in GloVe and are most frequent
+        valid_words = [(word, count) for word, count in word_counts.items() 
+                       if word in glove_embeddings]
+        
+        # Sort by frequency and take top words
+        valid_words.sort(key=lambda x: x[1], reverse=True)
+        valid_words = valid_words[:self.max_vocab_size]
+        
+        # Build vocabulary
+        self.vocab = [word for word, _ in valid_words]
+        self.word_to_idx = {word: idx for idx, word in enumerate(self.vocab)}
+        
+        # Get embeddings for vocabulary
+        vocab_embeddings = {word: glove_embeddings[word] for word in self.vocab}
+        
+        print(f"Final vocabulary size: {len(self.vocab)}")
+        
+        return self.vocab, vocab_embeddings
+    
+    def text_to_bow(self, text: str) -> np.ndarray:
+        """Convert text to bag-of-words vector"""
+        if self.vocab is None:
+            raise ValueError("Vocabulary not built. Call build_vocabulary first.")
+        
+        words = self.tokenize(text)
+        bow = np.zeros(len(self.vocab), dtype=np.int32)
+        
+        for word in words:
+            if word in self.word_to_idx:
+                bow[self.word_to_idx[word]] += 1
+        
+        return bow
+    
+    def corpus_to_bow(self, corpus: Dict[str, Dict]) -> Tuple[np.ndarray, List[str]]:
+        """Convert entire corpus to BoW matrix"""
+        print("Converting corpus to BoW representation...")
+        
+        doc_ids = list(corpus.keys())
+        bow_matrix = np.zeros((len(doc_ids), len(self.vocab)), dtype=np.int32)
+        
+        for i, doc_id in enumerate(doc_ids):
+            if i % 5000 == 0:
+                print(f"  Converted {i}/{len(doc_ids)} documents")
+            text = corpus[doc_id]['text']
+            bow_matrix[i] = self.text_to_bow(text)
+        
+        # Remove documents with no words in vocabulary
+        valid_docs = bow_matrix.sum(axis=1) > 0
+        bow_matrix = bow_matrix[valid_docs]
+        doc_ids = [doc_id for i, doc_id in enumerate(doc_ids) if valid_docs[i]]
+        
+        print(f"Valid documents after BoW conversion: {len(doc_ids)}")
+        
+        return bow_matrix, doc_ids
+    
+    def save_vocabulary(self):
+        """Save vocabulary and word mappings"""
+        vocab_data = {
+            'vocab': self.vocab,
+            'word_to_idx': self.word_to_idx
+        }
+        with open(config.VOCAB_PATH, 'wb') as f:
+            pickle.dump(vocab_data, f)
+        print(f"Vocabulary saved to {config.VOCAB_PATH}")
+    
+    def load_vocabulary(self):
+        """Load saved vocabulary"""
+        with open(config.VOCAB_PATH, 'rb') as f:
+            vocab_data = pickle.load(f)
+        self.vocab = vocab_data['vocab']
+        self.word_to_idx = vocab_data['word_to_idx']
+        print(f"Vocabulary loaded: {len(self.vocab)} words")
+
+
+def prepare_bow_data(corpus: Dict, dataset_name: str) -> Tuple:
+    """
+    Prepare BoW data with caching
+    
+    Returns:
+        bow_data, vocab, embeddings, doc_ids
+    """
+    cache = config.get_cache_paths(dataset_name)
+    
+    # Check cache
+    if cache['bow_data'].exists() and cache['vocab'].exists():
+        print("Loading BoW data from cache...")
+        bow_data = np.load(cache['bow_data'])
+        with open(cache['vocab'], 'rb') as f:
+            vocab_data = pickle.load(f)
+        vocab = vocab_data['vocab']
+        embeddings = np.load(cache['word_embeddings'])
+        with open(cache['doc_ids'], 'rb') as f:
+            doc_ids = pickle.load(f)
+        
+        print(f"Loaded: BoW {bow_data.shape}, Vocab {len(vocab)}, Embeddings {embeddings.shape}")
+        return bow_data, vocab, embeddings, doc_ids
+    
+    # Build from scratch
+    print("Building vocabulary and BoW representation...")
+    preprocessor = TextPreprocessor(
+        min_word_length=config.MIN_WORD_LENGTH,
+        max_vocab_size=config.MAX_VOCAB_SIZE
+    )
+    
+    # Build vocabulary from corpus
+    vocab, vocab_embeddings = preprocessor.build_vocabulary(corpus, str(config.GLOVE_PATH))
+    
+    # Convert to BoW
+    bow_data, doc_ids = preprocessor.corpus_to_bow(corpus)
+    
+    # Convert embeddings dict to array
+    embeddings = np.array([vocab_embeddings[word] for word in vocab])
+    
+    # Cache everything
+    print("Caching BoW data...")
+    np.save(cache['bow_data'], bow_data)
+    np.save(cache['word_embeddings'], embeddings)
+    
+    vocab_data = {'vocab': vocab, 'word_to_idx': preprocessor.word_to_idx}
+    with open(cache['vocab'], 'wb') as f:
+        pickle.dump(vocab_data, f)
+    with open(cache['doc_ids'], 'wb') as f:
+        pickle.dump(doc_ids, f)
+    
+    print(f"Prepared: BoW {bow_data.shape}, Vocab {len(vocab)}, Embeddings {embeddings.shape}")
+    return bow_data, vocab, embeddings, doc_ids
+
+
+if __name__ == "__main__":
+    import sys
+    from dataset_loaders import load_dataset
+    
+    dataset = sys.argv[1] if len(sys.argv) > 1 else "trec-covid"
+    corpus, _, _ = load_dataset(dataset)
+    bow_data, vocab, embeddings, doc_ids = prepare_bow_data(corpus, dataset)
