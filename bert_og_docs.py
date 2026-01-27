@@ -54,6 +54,34 @@ def load_raw_text_dataset(file_path):
     
     return texts, labels_int
 
+def load_reuters_csv(train_file, test_file):
+    # Load train CSV
+    print(f"Loading Reuters training data from {train_file}...")
+    train_df = pd.read_csv(train_file)
+    texts_train = train_df['data'].astype(str).tolist()
+    labels_train = train_df['class'].astype(str).tolist()
+    
+    # Load test CSV
+    print(f"Loading Reuters test data from {test_file}...")
+    test_df = pd.read_csv(test_file)
+    texts_test = test_df['data'].astype(str).tolist()
+    labels_test = test_df['class'].astype(str).tolist()
+    
+    # Clean up texts
+    texts_train = [basic_text_cleanup(text) for text in texts_train]
+    texts_test = [basic_text_cleanup(text) for text in texts_test]
+    
+    # Create unified label mapping
+    all_labels = sorted(set(labels_train + labels_test))
+    label_to_idx = {label: idx for idx, label in enumerate(all_labels)}
+    
+    y_train = np.array([label_to_idx[label] for label in labels_train])
+    y_test = np.array([label_to_idx[label] for label in labels_test])
+    
+    print(f"Train: {len(texts_train)} documents, Test: {len(texts_test)} documents")
+    print(f"Total unique labels: {len(all_labels)}")
+    
+    return texts_train, texts_test, y_train, y_test
 
 def load_dataset_with_splits(train_file, test_file):
     texts_train = []
@@ -147,6 +175,12 @@ DATASET_CONFIGS = {
     #     'has_splits': False,
     #     'first_n_classes': 10  # Using only first 10 classes for ohsumed dataset according to original WMD paper
     # },
+    'reuters': {
+        'train_file': DATA_DIR + 'ModApte_train.csv',
+        'test_file': DATA_DIR + 'ModApte_test.csv',
+        'has_splits': True,
+        'is_csv': True  # New flag to indicate CSV format
+    },
     'ohsumed': {
         'train_file': DATA_DIR + 'train_ohsumed_by_line.txt',
         'test_file': DATA_DIR + 'test_ohsumed_by_line.txt',
@@ -183,11 +217,18 @@ if __name__ == "__main__":
             
             # Loading dataset
             if config['has_splits']:
-                # Loading pre-split data
-                X_train, X_test, y_train, y_test = load_dataset_with_splits(
-                    config['train_file'],
-                    config['test_file']
-                )
+                # Check if CSV format (for Reuters)
+                if config.get('is_csv', False):
+                    X_train, X_test, y_train, y_test = load_reuters_csv(
+                        config['train_file'],
+                        config['test_file']
+                    )
+                else:
+                    # Loading pre-split text data
+                    X_train, X_test, y_train, y_test = load_dataset_with_splits(
+                        config['train_file'],
+                        config['test_file']
+                    )
             else:
                 # Loading single file and splitting
                 texts, labels = load_raw_text_dataset(config['file'])
