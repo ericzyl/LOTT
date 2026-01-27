@@ -54,18 +54,26 @@ def load_raw_text_dataset(file_path):
     
     return texts, labels_int
 
-def load_reuters_csv(train_file, test_file):
+def load_reuters_csv(train_file, test_file, dev_file=None):
     # Load train CSV
     print(f"Loading Reuters training data from {train_file}...")
     train_df = pd.read_csv(train_file)
     texts_train = train_df['text'].astype(str).tolist()
-    labels_train = train_df['topics'].astype(str).tolist()
+    labels_train = train_df['intent'].astype(str).tolist()
+    
+    # Load and combine dev if provided
+    if dev_file:
+        print(f"Loading Reuters dev data from {dev_file}...")
+        dev_df = pd.read_csv(dev_file)
+        texts_train.extend(dev_df['text'].astype(str).tolist())
+        labels_train.extend(dev_df['intent'].astype(str).tolist())
+        print(f"Combined train+dev: {len(texts_train)} documents")
     
     # Load test CSV
     print(f"Loading Reuters test data from {test_file}...")
     test_df = pd.read_csv(test_file)
     texts_test = test_df['text'].astype(str).tolist()
-    labels_test = test_df['topics'].astype(str).tolist()
+    labels_test = test_df['intent'].astype(str).tolist()
     
     # Clean up texts
     texts_train = [basic_text_cleanup(text) for text in texts_train]
@@ -176,10 +184,11 @@ DATASET_CONFIGS = {
     #     'first_n_classes': 10  # Using only first 10 classes for ohsumed dataset according to original WMD paper
     # },
     'reuters': {
-        'train_file': DATA_DIR + 'ModApte_train.csv',
-        'test_file': DATA_DIR + 'ModApte_test.csv',
+        'train_file': DATA_DIR + 'r8-train-stemmed.csv',
+        'dev_file': DATA_DIR + 'r8-dev-stemmed.csv',
+        'test_file': DATA_DIR + 'r8-test-stemmed.csv',
         'has_splits': True,
-        'is_csv': True  # New flag to indicate CSV format
+        'is_csv': True
     },
     # 'ohsumed': {
     #     'train_file': DATA_DIR + 'train_ohsumed_by_line.txt',
@@ -221,7 +230,8 @@ if __name__ == "__main__":
                 if config.get('is_csv', False):
                     X_train, X_test, y_train, y_test = load_reuters_csv(
                         config['train_file'],
-                        config['test_file']
+                        config['test_file'],
+                        config.get('dev_file')  # Pass dev_file if exists
                     )
                 else:
                     # Loading pre-split text data
