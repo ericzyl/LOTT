@@ -58,14 +58,14 @@ def load_reuters_csv(train_file, test_file):
     # Load train CSV
     print(f"Loading Reuters training data from {train_file}...")
     train_df = pd.read_csv(train_file)
-    texts_train = train_df['data'].astype(str).tolist()
-    labels_train = train_df['class'].astype(str).tolist()
+    texts_train = train_df['text'].astype(str).tolist()
+    labels_train = train_df['topics'].astype(str).tolist()
     
     # Load test CSV
     print(f"Loading Reuters test data from {test_file}...")
     test_df = pd.read_csv(test_file)
-    texts_test = test_df['data'].astype(str).tolist()
-    labels_test = test_df['class'].astype(str).tolist()
+    texts_test = test_df['text'].astype(str).tolist()
+    labels_test = test_df['topics'].astype(str).tolist()
     
     # Clean up texts
     texts_train = [basic_text_cleanup(text) for text in texts_train]
@@ -148,22 +148,22 @@ DATA_DIR = './Raw_Datasets/'
 # has_splits=True means train/test files exist separately
 # has_splits=False means single file needs to be split
 DATASET_CONFIGS = {
-    'bbcsport': {
-        'file': DATA_DIR + 'all_bbcsport_by_line.txt',
-        'has_splits': False
-    },
-    'twitter': {
-        'file': DATA_DIR + 'all_twitter_by_line.txt',
-        'has_splits': False
-    },
-    'amazon': {
-        'file': DATA_DIR + 'all_amazon_by_line.txt',
-        'has_splits': False
-    },
-    'classic': {
-        'file': DATA_DIR + 'all_classic.txt',
-        'has_splits': False
-    },
+    # 'bbcsport': {
+    #     'file': DATA_DIR + 'all_bbcsport_by_line.txt',
+    #     'has_splits': False
+    # },
+    # 'twitter': {
+    #     'file': DATA_DIR + 'all_twitter_by_line.txt',
+    #     'has_splits': False
+    # },
+    # 'amazon': {
+    #     'file': DATA_DIR + 'all_amazon_by_line.txt',
+    #     'has_splits': False
+    # },
+    # 'classic': {
+    #     'file': DATA_DIR + 'all_classic.txt',
+    #     'has_splits': False
+    # },
     # Link to download not working currently
     # 'reuters': {
     #     'train_file': DATA_DIR + 'r8-train-all-terms.txt',
@@ -181,16 +181,16 @@ DATASET_CONFIGS = {
         'has_splits': True,
         'is_csv': True  # New flag to indicate CSV format
     },
-    'ohsumed': {
-        'train_file': DATA_DIR + 'train_ohsumed_by_line.txt',
-        'test_file': DATA_DIR + 'test_ohsumed_by_line.txt',
-        'has_splits': True
-    },
-    '20news': {
-        'train_file': DATA_DIR + '20ng-train-all-terms.txt',
-        'test_file': DATA_DIR + '20ng-test-all-terms.txt',
-        'has_splits': True
-    }
+    # 'ohsumed': {
+    #     'train_file': DATA_DIR + 'train_ohsumed_by_line.txt',
+    #     'test_file': DATA_DIR + 'test_ohsumed_by_line.txt',
+    #     'has_splits': True
+    # },
+    # '20news': {
+    #     'train_file': DATA_DIR + '20ng-train-all-terms.txt',
+    #     'test_file': DATA_DIR + '20ng-test-all-terms.txt',
+    #     'has_splits': True
+    # }
 }
 
 if __name__ == "__main__":

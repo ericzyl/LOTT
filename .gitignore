@@ -15,3 +15,6 @@ RAG_BeIR_Pipeline/*
 # Hybrid RAG Generated Folders
 Hybriid_RAG/*
 !Hybrid_RAG/*.py
+
+# Results CSV files
+*.csv

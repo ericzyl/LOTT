@@ -48,7 +48,8 @@ bow_train, bow_test, topic_train, topic_test, y_train, y_test = train_test_split
 
 # methods = {'LOTT': lot.lot,
 #            'HOTT': hott.hott}
-methods = {'HOTT': hott.hott}
+# methods = {'HOTT': hott.hott}
+methods = {'LOTT': lot.lot}
 
 for method in methods.keys():
     if method in ['LOTT']:
@@ -63,36 +64,36 @@ for method in methods.keys():
         np.savez_compressed("lot_embeddings.npz", X_combined=X_combined, y_combined=y_combined)
 
         # Apply t-SNE to reduce the combined LOT embeddings to 2D
-        # tsne = TSNE(n_components=2, random_state=42)
-        # X_tsne = tsne.fit_transform(X_combined)
+        tsne = TSNE(n_components=2, random_state=42)
+        X_tsne = tsne.fit_transform(X_combined)
 
-        # # Define unique labels and colors
-        # unique_labels = np.unique(y_combined)
-        # colors = ['red', 'green', 'blue', 'orange']  # Customize colors as needed
-        # label_names = ['CACM', 'MED', 'CRAN', 'CISI']  # Customize names as needed
+        # Define unique labels and colors
+        unique_labels = np.unique(y_combined)
+        colors = ['red', 'green', 'blue', 'orange']  # Customize colors as needed
+        label_names = ['CACM', 'MED', 'CRAN', 'CISI']  # Customize names as needed
 
-        # # Plot the t-SNE results with class labels
-        # plt.figure(figsize=(6, 6))
+        # Plot the t-SNE results with class labels
+        plt.figure(figsize=(6, 6))
 
-        # # Plot each class with a specific color and label
-        # for i, label in enumerate(unique_labels):
-        #     plt.scatter(X_tsne[y_combined == label, 0], X_tsne[y_combined == label, 1], 
-        #                 color=colors[i], label=label_names[i], s=50, alpha=0.7)
+        # Plot each class with a specific color and label
+        for i, label in enumerate(unique_labels):
+            plt.scatter(X_tsne[y_combined == label, 0], X_tsne[y_combined == label, 1], 
+                        color=colors[i], label=label_names[i], s=50, alpha=0.7)
 
-        # # Add a legend
-        # plt.legend(loc="upper left", fontsize=15)
+        # Add a legend
+        plt.legend(loc="upper left", fontsize=15)
 
-        # # Title and axis labels
-        # plt.xticks([])
-        # plt.yticks([])
+        # Title and axis labels
+        plt.xticks([])
+        plt.yticks([])
 
-        # # Save the plot as a high-resolution image
-        # plt.savefig("tsne_lot_embeddings_with.png", dpi=300, bbox_inches='tight')
-        # #plt.show()
+        # Save the plot as a high-resolution image
+        plt.savefig("tsne_lot_embeddings_with.png", dpi=300, bbox_inches='tight')
+        #plt.show()
 
         
         # Compute test error
-        # test_error = knn(X_train, X_test, y_train, y_test, methods[method], C, n_neighbors=7)
+        test_error = knn(X_train, X_test, y_train, y_test, methods[method], C, n_neighbors=7)
     else:
         # If method is HOTT or HOFTT train LDA and compute topic-topic transport cost
         # X_train, X_test = topic_train, topic_test
