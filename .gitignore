@@ -18,3 +18,4 @@ Hybriid_RAG/*
 
 # Results CSV files
 *.csv
+*.npz
