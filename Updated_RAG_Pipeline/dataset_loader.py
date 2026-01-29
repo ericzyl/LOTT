@@ -1,7 +1,3 @@
-"""
-Dataset loader for TREC-COVID from BeIR
-Handles downloading, preprocessing, and saving documents
-"""
 import pickle
 from typing import Dict, List, Tuple
 import numpy as np
@@ -22,11 +18,11 @@ class TRECCovidLoader:
         """Load TREC-COVID dataset from BeIR"""
         print("Loading TREC-COVID dataset from BeIR...")
         
-        # Download and load using BeIR
+        # Downloading and loading using BeIR
         url = "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/trec-covid.zip"
         data_path = util.download_and_unzip(url, "datasets")
         
-        # Load the dataset
+        # Loading the dataset
         # split="test" loads test queries/qrels, but corpus is always the full corpus
         beir_corpus, beir_queries, beir_qrels = GenericDataLoader(data_folder=data_path).load(split="test")
         
@@ -34,7 +30,7 @@ class TRECCovidLoader:
         print(f"Total queries: {len(beir_queries)}")
         print(f"Total query-document pairs in qrels: {sum(len(docs) for docs in beir_qrels.values())}")
         
-        # Process corpus
+        # Processing corpus
         corpus_items = list(beir_corpus.items())
         if self.max_docs:
             corpus_items = corpus_items[:self.max_docs]
@@ -58,7 +54,7 @@ class TRECCovidLoader:
         
         print(f"Loaded {len(self.corpus)} documents")
         
-        # Use BeIR queries and qrels directly
+        # Using BeIR queries and qrels directly
         self.queries = beir_queries
         self.qrels = beir_qrels
         
@@ -106,10 +102,9 @@ def main():
     """Main function to load and save dataset"""
     loader = TRECCovidLoader(max_docs=config.MAX_DOCS)
     
-    # Load dataset
     corpus, queries, qrels = loader.load_dataset()
     
-    # Save data (NO SPLIT - use all documents for retrieval)
+    # Saving data (No Split- use all documents for retrieval)
     loader.save_data()
     
     print("\nDataset loading complete!")

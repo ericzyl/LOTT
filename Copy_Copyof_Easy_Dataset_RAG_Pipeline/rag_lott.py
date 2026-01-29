@@ -1,6 +1,3 @@
-"""
-LOTT-based RAG system using FAISS for efficient retrieval
-"""
 import numpy as np
 import faiss
 import pickle
@@ -10,8 +7,7 @@ import config
 
 
 class LOTTRAGSystem:
-    """RAG system using LOTT embeddings and FAISS index"""
-    
+
     def __init__(self, embeddings: np.ndarray, doc_ids: List[str],
                  corpus: Dict[str, Dict]):
         self.embeddings = embeddings
@@ -21,7 +17,6 @@ class LOTTRAGSystem:
         self.embedding_dim = embeddings.shape[1]
         
     def build_index(self):
-        """Build FAISS index for efficient similarity search"""
         print(f"Building FAISS index with {len(self.embeddings)} vectors...")
         start_time = time.time()
         
@@ -40,16 +35,6 @@ class LOTTRAGSystem:
         return build_time
     
     def search(self, query_embedding: np.ndarray, k: int = 10) -> Tuple[List[str], List[float]]:
-        """
-        Search for top-k most similar documents
-        
-        Args:
-            query_embedding: Query embedding vector
-            k: Number of results to return
-        
-        Returns:
-            Tuple of (doc_ids, similarity_scores)
-        """
         if self.index is None:
             raise ValueError("Index not built. Call build_index() first.")
         
@@ -68,17 +53,6 @@ class LOTTRAGSystem:
     
     def batch_search(self, query_embeddings: np.ndarray, k: int = 10,
                      show_progress: bool = True) -> Tuple[List[List[str]], List[List[float]]]:
-        """
-        Batch search for multiple queries
-        
-        Args:
-            query_embeddings: Array of query embeddings (n_queries, embedding_dim)
-            k: Number of results per query
-            show_progress: Whether to show progress bar
-        
-        Returns:
-            Tuple of (list of doc_id lists, list of score lists)
-        """
         if self.index is None:
             raise ValueError("Index not built. Call build_index() first.")
         
@@ -98,7 +72,6 @@ class LOTTRAGSystem:
         return all_doc_ids, all_scores
     
     def save_index(self, path=None):
-        """Save FAISS index to disk"""
         if path is None:
             path = config.LOTT_FAISS_INDEX
         
@@ -106,7 +79,6 @@ class LOTTRAGSystem:
         print(f"FAISS index saved to {path}")
     
     def load_index(self, path=None):
-        """Load FAISS index from disk"""
         if path is None:
             path = config.LOTT_FAISS_INDEX
         
@@ -116,7 +88,6 @@ class LOTTRAGSystem:
 
 
 def build_lott_rag_system():
-    """Build and save LOTT RAG system"""
     print("\n" + "="*80)
     print("BUILDING LOTT RAG SYSTEM")
     print("="*80)
@@ -156,15 +127,6 @@ def build_lott_rag_system():
 
 
 def generate_lott_query_embeddings(queries: Dict[str, str]) -> Tuple[np.ndarray, List[str]]:
-    """
-    Generate LOTT embeddings for queries
-    
-    Args:
-        queries: Dictionary of {query_id: query_text}
-    
-    Returns:
-        Tuple of (query_embeddings, query_ids)
-    """
     from preprocessing import TextPreprocessor
     from lda_trainer import LDATrainer
     from lott_embeddings import LOTTEmbeddingGenerator
@@ -198,7 +160,6 @@ def generate_lott_query_embeddings(queries: Dict[str, str]) -> Tuple[np.ndarray,
 
 
 def test_lott_rag():
-    """Test LOTT RAG system with sample queries"""
     print("\n" + "="*80)
     print("TESTING LOTT RAG SYSTEM")
     print("="*80)

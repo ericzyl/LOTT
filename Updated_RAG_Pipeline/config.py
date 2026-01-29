@@ -1,7 +1,3 @@
-"""
-Configuration file for RAG system
-Defines all paths, parameters, and settings
-"""
 import os
 from pathlib import Path
 
@@ -13,7 +9,7 @@ EMBEDDINGS_DIR = PROJECT_ROOT / "Updated_RAG_Pipeline/embeddings"
 RESULTS_DIR = PROJECT_ROOT / "Updated_RAG_Pipeline/results"
 FAISS_INDEX_DIR = PROJECT_ROOT / "Updated_RAG_Pipeline/faiss_indices"
 
-# Create directories if they don't exist
+# Creating directories if they don't exist
 for dir_path in [DATA_DIR, MODELS_DIR, EMBEDDINGS_DIR, RESULTS_DIR, FAISS_INDEX_DIR]:
     dir_path.mkdir(exist_ok=True, parents=True)
 
@@ -27,14 +23,14 @@ GLOVE_DIM = 300
 
 # LDA configuration
 N_TOPICS = 100  # Number of topics for LDA
-N_TOP_WORDS = 20  # Keep top N words per topic for sparse representation
+N_TOP_WORDS = 20  # Keeping top N words per topic for sparse representation
 LDA_ITERATIONS = 1500
 # LDA_ITERATIONS = 5
 LDA_RANDOM_STATE = 42
 
 # LOTT configuration
 GAUSSIAN_FWHM = 25  # Full-width half-maximum for Gaussian reference
-P_NORM = 1  # Use W1 distance (p=1)
+P_NORM = 1  # Using W1 distance (p=1)
 
 # BERT configuration
 BERT_MODEL = "sentence-transformers/all-MiniLM-L6-v2"  # Fast and efficient SBERT model

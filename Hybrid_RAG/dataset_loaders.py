@@ -1,6 +1,3 @@
-"""
-Dataset loaders for TREC-COVID and MS-MARCO
-"""
 import pickle
 from typing import Dict, Tuple
 from beir import util
@@ -9,7 +6,6 @@ import config
 
 
 def load_trec_covid() -> Tuple[Dict, Dict, Dict]:
-    """Load TREC-COVID dataset"""
     print("Loading TREC-COVID dataset...")
     
     # Check cache first
@@ -58,7 +54,6 @@ def load_trec_covid() -> Tuple[Dict, Dict, Dict]:
 
 
 def load_msmarco() -> Tuple[Dict, Dict, Dict]:
-    """Load MS-MARCO dataset"""
     print("Loading MS-MARCO dataset...")
     
     # Check cache
@@ -78,7 +73,7 @@ def load_msmarco() -> Tuple[Dict, Dict, Dict]:
     data_path = util.download_and_unzip(url, str(config.DATA_DIR))
     beir_corpus, beir_queries, beir_qrels = GenericDataLoader(data_folder=data_path).load(split="dev")
     
-    # Process corpus (may take a while for 8.8M docs)
+    # Process corpus
     corpus = {}
     print(f"Processing {len(beir_corpus)} documents...")
     for idx, (doc_id, doc_data) in enumerate(beir_corpus.items()):
@@ -111,7 +106,6 @@ def load_msmarco() -> Tuple[Dict, Dict, Dict]:
 
 
 def load_dataset(dataset_name: str) -> Tuple[Dict, Dict, Dict]:
-    """Load dataset by name"""
     if dataset_name == "trec-covid":
         return load_trec_covid()
     elif dataset_name == "msmarco":

@@ -36,7 +36,7 @@ def load_raw_text_dataset(file_path):
                 continue
             
             label, text = parts
-            # Remove quotes from labels if present
+            # Removing quotes from labels if present
             label = label.strip('"')
             
             # Minimal preprocessing- just cleaning up white spaces
@@ -55,13 +55,13 @@ def load_raw_text_dataset(file_path):
     return texts, labels_int
 
 def load_reuters_csv(train_file, test_file, dev_file=None):
-    # Load train CSV
+    # Loading train CSV
     print(f"Loading Reuters training data from {train_file}...")
     train_df = pd.read_csv(train_file)
     texts_train = train_df['text'].astype(str).tolist()
     labels_train = train_df['intent'].astype(str).tolist()
     
-    # Load and combine dev if provided
+    # Loading and combining dev if provided
     if dev_file:
         print(f"Loading Reuters dev data from {dev_file}...")
         dev_df = pd.read_csv(dev_file)
@@ -69,17 +69,17 @@ def load_reuters_csv(train_file, test_file, dev_file=None):
         labels_train.extend(dev_df['intent'].astype(str).tolist())
         print(f"Combined train+dev: {len(texts_train)} documents")
     
-    # Load test CSV
+    # Loading test CSV
     print(f"Loading Reuters test data from {test_file}...")
     test_df = pd.read_csv(test_file)
     texts_test = test_df['text'].astype(str).tolist()
     labels_test = test_df['intent'].astype(str).tolist()
     
-    # Clean up texts
+    # Cleaning up texts
     texts_train = [basic_text_cleanup(text) for text in texts_train]
     texts_test = [basic_text_cleanup(text) for text in texts_test]
     
-    # Create unified label mapping
+    # Creating unified label mapping
     all_labels = sorted(set(labels_train + labels_test))
     label_to_idx = {label: idx for idx, label in enumerate(all_labels)}
     
@@ -127,7 +127,7 @@ def load_dataset_with_splits(train_file, test_file):
             texts_test.append(text)
             labels_test.append(label)
     
-    # Create unified label mapping from both train and test
+    # Creating unified label mapping from both train and test
     all_labels = sorted(set(labels_train + labels_test))
     label_to_idx = {label: idx for idx, label in enumerate(all_labels)}
     
@@ -207,7 +207,7 @@ if __name__ == "__main__":
     
     # Random seed for train/test split (for datasets without predefined splits)
     split_seed = 42
-    test_size = 0.2  # 20% test size
+    test_size = 0.2
     
     print("="*80)
     print("BERT Models on Raw Text Datasets")
@@ -299,7 +299,7 @@ if __name__ == "__main__":
                 print(f"  Test accuracy: {1-test_error:.6f}")
                 print(f"  Runtime: {runtime:.2f} seconds")
                 
-                # Store results
+                # Storing results
                 all_results.append({
                     'Dataset': dataset_name,
                     'Model': method,

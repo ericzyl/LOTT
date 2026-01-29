@@ -1,7 +1,3 @@
-"""
-Main pipeline to orchestrate the entire RAG system setup
-Runs all preprocessing, training, and embedding generation steps
-"""
 import numpy as np
 import pickle
 from pathlib import Path
@@ -14,12 +10,10 @@ from lott_embeddings import generate_and_save_lott_embeddings
 
 
 def check_file_exists(filepath):
-    """Check if a file exists"""
     return Path(filepath).exists()
 
 
 def step_1_load_dataset():
-    """Step 1: Load and save dataset (NO SPLIT)"""
     print("\n" + "="*80)
     print("STEP 1: LOADING DATASET")
     print("="*80)
@@ -36,7 +30,6 @@ def step_1_load_dataset():
 
 
 def step_2_preprocess_data(corpus):
-    """Step 2: Build vocabulary and create BoW representations"""
     print("\n" + "="*80)
     print("STEP 2: PREPROCESSING DATA")
     print("="*80)
@@ -44,15 +37,15 @@ def step_2_preprocess_data(corpus):
     if check_file_exists(config.VOCAB_PATH) and check_file_exists(config.WORD_EMBEDDINGS_PATH):
         print("Vocabulary and embeddings already prepared. Loading...")
         
-        # Load vocabulary
+        # Loading vocabulary
         with open(config.VOCAB_PATH, 'rb') as f:
             vocab_data = pickle.load(f)
         vocab = vocab_data['vocab']
         
-        # Load word embeddings
+        # Loadinging word embeddings
         embeddings = np.load(config.WORD_EMBEDDINGS_PATH)
         
-        # Recreate BoW data
+        # Recreating BoW data
         preprocessor = TextPreprocessor()
         preprocessor.load_vocabulary()
         
@@ -67,7 +60,6 @@ def step_2_preprocess_data(corpus):
 
 
 def step_3_train_lda(bow_data, embeddings, vocab):
-    """Step 3: Train LDA model and compute topic costs"""
     print("\n" + "="*80)
     print("STEP 3: TRAINING LDA MODEL")
     print("="*80)
@@ -86,7 +78,6 @@ def step_3_train_lda(bow_data, embeddings, vocab):
 
 
 def step_4_generate_bert_embeddings(corpus, doc_ids):
-    """Step 4: Generate BERT embeddings"""
     print("\n" + "="*80)
     print("STEP 4: GENERATING BERT EMBEDDINGS")
     print("="*80)
@@ -102,7 +93,6 @@ def step_4_generate_bert_embeddings(corpus, doc_ids):
 
 
 def step_5_generate_lott_embeddings(bow_data):
-    """Step 5: Generate LOTT embeddings"""
     print("\n" + "="*80)
     print("STEP 5: GENERATING LOTT EMBEDDINGS")
     print("="*80)
@@ -118,7 +108,6 @@ def step_5_generate_lott_embeddings(bow_data):
 
 
 def save_pipeline_metadata(doc_ids):
-    """Save metadata about document ordering"""
     metadata = {
         'doc_ids': doc_ids
     }
@@ -131,31 +120,30 @@ def save_pipeline_metadata(doc_ids):
 
 
 def run_full_pipeline():
-    """Run the complete pipeline"""
     print("\n" + "="*80)
     print("STARTING FULL RAG PIPELINE")
     print("="*80)
     
     config.print_config()
     
-    # Step 1: Load dataset (NO SPLIT)
+    # Step 1: Loading dataset (No Split)
     corpus, queries, qrels = step_1_load_dataset()
     
-    # Step 2: Preprocess and create BoW
+    # Step 2: Preprocessing and creating BoW
     bow_data, vocab, embeddings, doc_ids = step_2_preprocess_data(corpus)
     
-    # Step 3: Train LDA
+    # Step 3: Training LDA
     lda_model, topics, lda_centers, topic_cost_matrix = step_3_train_lda(
         bow_data, embeddings, vocab
     )
     
-    # Step 4: Generate BERT embeddings
+    # Step 4: Generating BERT embeddings
     bert_embeddings = step_4_generate_bert_embeddings(corpus, doc_ids)
     
-    # Step 5: Generate LOTT embeddings
+    # Step 5: Generating LOTT embeddings
     lott_embeddings, lott_topics = step_5_generate_lott_embeddings(bow_data)
     
-    # Save metadata
+    # Saving metadata
     save_pipeline_metadata(doc_ids)
     
     print("\n" + "="*80)

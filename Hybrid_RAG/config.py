@@ -1,7 +1,3 @@
-"""
-Configuration for Hybrid RAG System
-BERT Retrieval + LOTT Reranking
-"""
 from pathlib import Path
 
 # Base directories
@@ -17,8 +13,8 @@ for dir_path in [DATA_DIR, CACHE_DIR, RESULTS_DIR]:
 # Dataset selection
 AVAILABLE_DATASETS = ["trec-covid", "msmarco"]
 
-# GloVe embeddings path (update this to your actual path)
-GLOVE_PATH = DATA_DIR / "wiki_giga_2024_300_MFT20_vectors_seed_2024_alpha_0.75_eta_0.05_combined.txt"  # Update this!
+# GloVe embeddings path
+GLOVE_PATH = DATA_DIR / "wiki_giga_2024_300_MFT20_vectors_seed_2024_alpha_0.75_eta_0.05_combined.txt"
 GLOVE_DIM = 300
 
 # BERT configuration

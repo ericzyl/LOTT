@@ -1,7 +1,3 @@
-"""
-Evaluation and comparison of BERT and LOTT RAG systems
-Computes retrieval metrics and timing comparisons
-"""
 import numpy as np
 import pickle
 import time
@@ -16,14 +12,12 @@ from bert_embeddings import BERTEmbeddingGenerator
 
 
 def compute_precision_at_k(retrieved: List[str], relevant: set, k: int) -> float:
-    """Compute Precision@K"""
     retrieved_k = retrieved[:k]
     relevant_retrieved = sum(1 for doc_id in retrieved_k if doc_id in relevant)
     return relevant_retrieved / k if k > 0 else 0.0
 
 
 def compute_recall_at_k(retrieved: List[str], relevant: set, k: int) -> float:
-    """Compute Recall@K"""
     if len(relevant) == 0:
         return 0.0
     retrieved_k = retrieved[:k]
@@ -32,7 +26,6 @@ def compute_recall_at_k(retrieved: List[str], relevant: set, k: int) -> float:
 
 
 def compute_mrr(retrieved: List[str], relevant: set) -> float:
-    """Compute Mean Reciprocal Rank"""
     for i, doc_id in enumerate(retrieved, 1):
         if doc_id in relevant:
             return 1.0 / i
@@ -40,7 +33,6 @@ def compute_mrr(retrieved: List[str], relevant: set) -> float:
 
 
 def compute_ndcg_at_k(retrieved: List[str], relevance_scores: Dict[str, float], k: int) -> float:
-    """Compute Normalized Discounted Cumulative Gain@K"""
     retrieved_k = retrieved[:k]
     
     # DCG
@@ -57,7 +49,6 @@ def compute_ndcg_at_k(retrieved: List[str], relevance_scores: Dict[str, float], 
 
 
 def compute_map(all_retrieved: List[List[str]], all_relevant: List[set]) -> float:
-    """Compute Mean Average Precision"""
     average_precisions = []
     
     for retrieved, relevant in zip(all_retrieved, all_relevant):
@@ -80,7 +71,6 @@ def compute_map(all_retrieved: List[List[str]], all_relevant: List[set]) -> floa
 
 
 class RAGEvaluator:
-    """Evaluate and compare RAG systems"""
     
     def __init__(self, qrels: Dict[str, Dict[str, float]]):
         self.qrels = qrels
@@ -88,18 +78,7 @@ class RAGEvaluator:
         
     def evaluate_system(self, system_name: str, all_retrieved: List[List[str]], 
                        query_ids: List[str], k_values: List[int] = None) -> Dict:
-        """
-        Evaluate a RAG system
-        
-        Args:
-            system_name: Name of the system (BERT or LOTT)
-            all_retrieved: List of retrieved document lists for each query
-            query_ids: List of query IDs
-            k_values: List of K values for metrics
-        
-        Returns:
-            Dictionary of evaluation metrics
-        """
+
         if k_values is None:
             k_values = config.TOP_K_VALUES
         
@@ -137,7 +116,6 @@ class RAGEvaluator:
         return results
     
     def print_comparison(self):
-        """Print comparison table"""
         if len(self.results) < 2:
             print("Need at least 2 systems to compare")
             return
@@ -167,7 +145,6 @@ class RAGEvaluator:
         print("="*80)
     
     def plot_comparison(self, save_path=None):
-        """Plot comparison charts"""
         if len(self.results) < 2:
             print("Need at least 2 systems to compare")
             return
@@ -211,7 +188,6 @@ class RAGEvaluator:
         plt.close()
     
     def save_results(self, save_path=None):
-        """Save results to JSON"""
         if save_path is None:
             save_path = config.METRICS_RESULTS_PATH
         
@@ -224,12 +200,7 @@ class RAGEvaluator:
 def benchmark_timing(bert_system: BERTRAGSystem, lott_system: LOTTRAGSystem,
                      bert_queries: np.ndarray, lott_queries: np.ndarray,
                      n_queries: int = 100) -> Dict:
-    """
-    Benchmark timing for both systems
-    
-    Returns:
-        Dictionary with timing results
-    """
+
     print("\n" + "="*80)
     print("BENCHMARKING RETRIEVAL TIME")
     print("="*80)
@@ -287,7 +258,6 @@ def benchmark_timing(bert_system: BERTRAGSystem, lott_system: LOTTRAGSystem,
 
 
 def run_full_evaluation():
-    """Run complete evaluation of both RAG systems"""
     print("\n" + "="*80)
     print("RUNNING FULL RAG EVALUATION")
     print("="*80)

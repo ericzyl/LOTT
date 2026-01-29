@@ -1,7 +1,3 @@
-"""
-Visualization of results
-Comparison plots for different methods
-"""
 import argparse
 import json
 import numpy as np
@@ -10,8 +6,7 @@ import config
 
 
 def plot_comparison(dataset_name: str):
-    """Create comparison plots for a dataset"""
-    
+
     # Load results
     results_path = config.get_results_path(dataset_name)
     with open(results_path, 'r') as f:

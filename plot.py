@@ -34,25 +34,27 @@ data_name = 'classic-emd_tr_te_split.mat'
 # data_name = '20ng2_500-emd_tr_te.mat'
 # data_name = 'recipe2-emd_tr_te_split.mat'
 
-# # p=1 for W1 and p=2 for W2
-# p = 1
-# data = loader(data_path + data_name, embeddings_path, p=p)
-# cost_E = data['cost_E']
-# cost_T = data['cost_T']
+# p=1 for W1 and p=2 for W2
+p = 1
+data = loader(data_path + data_name, embeddings_path, p=p)
+cost_E = data['cost_E']
+cost_T = data['cost_T']
 
-# bow_data, y = data['X'], data['y']
-# topic_proportions = data['proportions']
-# lda_centers = data['lda_C']
-# embeddings  = data['embeddings']
+bow_data, y = data['X'], data['y']
+topic_proportions = data['proportions']
+lda_centers = data['lda_C']
+embeddings  = data['embeddings']
 
-# seed = 0
-# bow_train, bow_test, topic_train, topic_test, y_train, y_test = train_test_split(bow_data, topic_proportions, y, random_state=seed)
+seed = 0
+bow_train, bow_test, topic_train, topic_test, y_train, y_test = train_test_split(bow_data, topic_proportions, y, random_state=seed)
 
 # methods = {'LOTT': lot.lot,
 #            'HOTT': hott.hott}
 # methods = {'HOTT': hott.hott}
 # methods = {'LOTT': lot.lot}
-methods = {}
+methods = {'LOTT': lot.lot,
+           'HOTT': hott.hott,
+           'nBoW': None}
 
 for method in methods.keys():
     if method in ['LOTT']:
@@ -93,7 +95,12 @@ for method in methods.keys():
                         color=colors[i], label=label_names[i], s=1, alpha=0.7)
 
         # Add a legend
-        plt.legend(loc="upper left", fontsize=15)
+        plt.legend(loc="upper left", fontsize=15, markerscale=10)
+
+        # Add method name in top right
+        plt.text(0.98, 0.98, method, transform=plt.gca().transAxes,
+                fontsize=20, verticalalignment='top', horizontalalignment='right',
+                color='black', weight='bold')
 
         # Title and axis labels
         plt.xticks([])
@@ -111,38 +118,47 @@ for method in methods.keys():
         test_error = 1 - accuracy_score(y_test, y_pred)
     else:
         # If method is HOTT or HOFTT train LDA and compute topic-topic transport cost
-        # X_train, X_test = topic_train, topic_test
-        X_train, X_test = bow_train, bow_test
+        if method == 'HOTT':
+            X_train, X_test = topic_train, topic_test
+            C = cost_T
+        elif method == 'nBoW':
+            X_train, X_test = bow_train, bow_test
+            C = cost_E
 
         # Apply t-SNE with the specified metric
         X_combined2 = np.vstack([X_train, X_test])
         y_combined2 = np.hstack([y_train, y_test])
-        np.savez_compressed("embeddings3.npz", X_combined=X_combined2, y_combined=y_combined2)
+        np.savez_compressed(f"{method}_embeddings.npz", X_combined=X_combined2, y_combined=y_combined2)
 
-        # tsne = TSNE(n_components=2, random_state=42)
-        # X_tsne2 = tsne.fit_transform(X_combined2)
+        tsne = TSNE(n_components=2, random_state=42)
+        X_tsne2 = tsne.fit_transform(X_combined2)
 
-        # unique_labels = np.unique(y_combined2)
-        # colors = ['red', 'green', 'blue', 'orange']  # Customize colors as needed
-        # label_names = ['CACM', 'MED', 'CRAN', 'CISI']  # Customize names as needed
+        unique_labels = np.unique(y_combined2)
+        colors = ['#cc398d', '#aba7ce', '#86bedc', '#fd9f5a']  # Customize colors as needed
+        label_names = ['CACM', 'MED', 'CRAN', 'CISI']  # Customize names as needed
 
-        # # Plot the t-SNE results with class labels
-        # plt.figure(figsize=(6, 6))
+        # Plot the t-SNE results with class labels
+        plt.figure(figsize=(6, 6))
 
-        # # Plot each class with a specific color and label
-        # for i, label in enumerate(unique_labels):
-        #     plt.scatter(X_tsne2[y_combined2 == label, 0], X_tsne2[y_combined2 == label, 1], 
-        #                 color=colors[i], label=label_names[i], s=50, alpha=0.7)
+        # Plot each class with a specific color and label
+        for i, label in enumerate(unique_labels):
+            plt.scatter(X_tsne2[y_combined2 == label, 0], X_tsne2[y_combined2 == label, 1], 
+                        color=colors[i], label=label_names[i], s=1, alpha=0.7)
 
-        # # Add a legend
-        # plt.legend(loc="upper left", fontsize=15)
+        # Add a legend
+        plt.legend(loc="upper left", fontsize=15, markerscale=10)
 
-        # # Title and axis labels
-        # plt.xticks([])
-        # plt.yticks([])
+        # Add method name in top right
+        plt.text(0.98, 0.98, method, transform=plt.gca().transAxes,
+            fontsize=20, verticalalignment='top', horizontalalignment='right',
+            color='black', weight='bold')
 
-        # # Save the plot as a high-resolution image
-        # plt.savefig("tsne_embeddings.png", dpi=300, bbox_inches='tight')
+        # Title and axis labels
+        plt.xticks([])
+        plt.yticks([])
+
+        # Save the plot as a high-resolution image
+        plt.savefig(f"{method}_tsne_embeddings.png", dpi=300, bbox_inches='tight')
 
     print(f"{method} test error: {test_error:.4f}")
 
@@ -229,7 +245,13 @@ for i, label in enumerate(unique_labels):
                 X_tsne_bert[y_combined_bert == label, 1], 
                 color=colors[i], label=label_names[i], s=1, alpha=0.7)
 
-plt.legend(loc="upper left", fontsize=15)
+plt.legend(loc="upper left", fontsize=15, markerscale=10)
+
+# Add method name in top right
+plt.text(0.98, 0.98, bert_model_name, transform=plt.gca().transAxes,
+         fontsize=20, verticalalignment='top', horizontalalignment='right',
+         color='black', weight='bold')
+
 plt.xticks([])
 plt.yticks([])
 

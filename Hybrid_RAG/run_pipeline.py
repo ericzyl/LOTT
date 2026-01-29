@@ -1,7 +1,3 @@
-"""
-Main pipeline for hybrid RAG system
-BERT Retrieval + LOTT Reranking
-"""
 import argparse
 import json
 import pickle
@@ -16,8 +12,7 @@ from evaluate_metrics import evaluate_retrieval
 
 
 def run_experiment(dataset_name: str):
-    """Run complete experiment for a dataset"""
-    
+
     config.print_config(dataset_name)
     
     # =========================================================================

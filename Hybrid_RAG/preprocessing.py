@@ -1,8 +1,3 @@
-"""
-Text preprocessing for BoW representation
-COPY THE TEXTPREPROCESSOR CLASS FROM YOUR PREVIOUS preprocessing.py
-Then use the functions below
-"""
 import numpy as np
 import pickle
 from typing import Dict, List, Tuple
@@ -25,8 +20,7 @@ except LookupError:
 
 
 class TextPreprocessor:
-    """Handles text preprocessing for BoW representation"""
-    
+
     def __init__(self, min_word_length=3, max_vocab_size=10000):
         self.min_word_length = min_word_length
         self.max_vocab_size = max_vocab_size
@@ -55,7 +49,7 @@ class TextPreprocessor:
         return words
     
     def build_vocabulary(self, corpus: Dict[str, Dict], glove_path: str) -> Tuple[List[str], Dict[str, np.ndarray]]:
-        """Build vocabulary from corpus and load GloVe embeddings"""
+
         print("Building vocabulary...")
         
         # Count word frequencies
@@ -130,7 +124,6 @@ class TextPreprocessor:
         return self.vocab, vocab_embeddings
     
     def text_to_bow(self, text: str) -> np.ndarray:
-        """Convert text to bag-of-words vector"""
         if self.vocab is None:
             raise ValueError("Vocabulary not built. Call build_vocabulary first.")
         
@@ -144,7 +137,6 @@ class TextPreprocessor:
         return bow
     
     def corpus_to_bow(self, corpus: Dict[str, Dict]) -> Tuple[np.ndarray, List[str]]:
-        """Convert entire corpus to BoW matrix"""
         print("Converting corpus to BoW representation...")
         
         doc_ids = list(corpus.keys())
@@ -166,7 +158,6 @@ class TextPreprocessor:
         return bow_matrix, doc_ids
     
     def save_vocabulary(self):
-        """Save vocabulary and word mappings"""
         vocab_data = {
             'vocab': self.vocab,
             'word_to_idx': self.word_to_idx
@@ -176,7 +167,6 @@ class TextPreprocessor:
         print(f"Vocabulary saved to {config.VOCAB_PATH}")
     
     def load_vocabulary(self):
-        """Load saved vocabulary"""
         with open(config.VOCAB_PATH, 'rb') as f:
             vocab_data = pickle.load(f)
         self.vocab = vocab_data['vocab']
@@ -185,12 +175,7 @@ class TextPreprocessor:
 
 
 def prepare_bow_data(corpus: Dict, dataset_name: str) -> Tuple:
-    """
-    Prepare BoW data with caching
-    
-    Returns:
-        bow_data, vocab, embeddings, doc_ids
-    """
+
     cache = config.get_cache_paths(dataset_name)
     
     # Check cache

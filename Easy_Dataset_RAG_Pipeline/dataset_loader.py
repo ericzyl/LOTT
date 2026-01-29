@@ -1,7 +1,3 @@
-"""
-Dataset loader for MS MARCO from BeIR
-Handles downloading, preprocessing, and saving documents
-"""
 import pickle
 from typing import Dict, List, Tuple
 import numpy as np
@@ -10,8 +6,7 @@ from beir import util
 from beir.datasets.data_loader import GenericDataLoader
 
 class MSMARCOLoader:
-    """Loader for MS MARCO dataset from BeIR"""
-    
+
     def __init__(self, max_docs=None):
         self.max_docs = max_docs
         self.corpus = None
@@ -19,7 +14,6 @@ class MSMARCOLoader:
         self.qrels = None
         
     def load_dataset(self):
-        """Load MS MARCO dataset from BeIR"""
         print("Loading MS MARCO dataset from BeIR...")
         
         # Download and load using BeIR
@@ -75,7 +69,6 @@ class MSMARCOLoader:
         return self.corpus, self.queries, self.qrels
     
     def save_data(self):
-        """Save processed data to disk"""
         print("Saving processed data...")
         
         with open(config.DOCUMENTS_PATH, 'wb') as f:
@@ -91,7 +84,6 @@ class MSMARCOLoader:
     
     @staticmethod
     def load_saved_data():
-        """Load previously saved data"""
         print("Loading saved data...")
         
         with open(config.DOCUMENTS_PATH, 'rb') as f:
@@ -110,7 +102,6 @@ class MSMARCOLoader:
 
 
 def main():
-    """Main function to load and save dataset"""
     loader = MSMARCOLoader(max_docs=config.MAX_DOCS)
     
     # Load dataset

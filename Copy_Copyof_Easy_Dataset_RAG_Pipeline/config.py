@@ -1,7 +1,3 @@
-"""
-Configuration file for RAG system
-Defines all paths, parameters, and settings
-"""
 import os
 from pathlib import Path
 
@@ -78,7 +74,6 @@ RANDOM_SEED = 42
 VERBOSE = True
 
 def print_config():
-    """Print current configuration"""
     print("=" * 80)
     print("RAG SYSTEM CONFIGURATION")
     print("=" * 80)

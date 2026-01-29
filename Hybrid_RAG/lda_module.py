@@ -1,6 +1,3 @@
-"""
-LDA training and topic inference with caching
-"""
 import numpy as np
 import pickle
 from sklearn.decomposition import LatentDirichletAllocation
@@ -9,7 +6,6 @@ import config
 
 
 def sparse_ot(weights1, weights2, M):
-    """Compute OT distance between sparse distributions"""
     import ot
     
     weights1 = weights1 / weights1.sum()
@@ -26,8 +22,6 @@ def sparse_ot(weights1, weights2, M):
 
 
 class LDAModule:
-    """LDA training with caching"""
-    
     def __init__(self, dataset_name: str):
         self.dataset_name = dataset_name
         self.cache = config.get_cache_paths(dataset_name)
@@ -37,8 +31,6 @@ class LDAModule:
         self.topic_cost_matrix = None
         
     def train_or_load(self, bow_data: np.ndarray, embeddings: np.ndarray, vocab: list):
-        """Train LDA or load from cache"""
-        
         # Check cache
         if self._load_from_cache():
             return self.topics, self.lda_centers, self.topic_cost_matrix
@@ -94,8 +86,7 @@ class LDAModule:
         return self.topics, self.lda_centers, self.topic_cost_matrix
     
     def infer_topics(self, bow_data: np.ndarray, cache_key: str = 'topic_proportions') -> np.ndarray:
-        """Infer topic proportions for documents"""
-        
+
         cache_path = self.cache[cache_key]
         
         # Check cache
@@ -114,7 +105,6 @@ class LDAModule:
         return topic_proportions
     
     def _load_from_cache(self) -> bool:
-        """Load LDA artifacts from cache"""
         if not self.cache['lda_model'].exists():
             return False
         
@@ -129,7 +119,6 @@ class LDAModule:
         return True
     
     def _save_to_cache(self):
-        """Save LDA artifacts to cache"""
         print("Caching LDA artifacts...")
         with open(self.cache['lda_model'], 'wb') as f:
             pickle.dump(self.model, f)

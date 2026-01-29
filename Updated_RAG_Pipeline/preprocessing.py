@@ -1,7 +1,3 @@
-"""
-Preprocessing utilities for text data
-Handles vocabulary building, BoW conversion, and GloVe loading
-"""
 import numpy as np
 import pickle
 from collections import Counter
@@ -12,7 +8,7 @@ from nltk.stem import WordNetLemmatizer
 import nltk
 import config
 
-# Download required NLTK data
+# Downloading required NLTK data
 try:
     nltk.data.find('corpora/stopwords')
 except LookupError:
@@ -30,8 +26,7 @@ except LookupError:
 
 
 class TextPreprocessor:
-    """Handles text preprocessing for BoW representation"""
-    
+  
     def __init__(self, min_word_length=3, max_vocab_size=10000):
         self.min_word_length = min_word_length
         self.max_vocab_size = max_vocab_size
@@ -41,29 +36,27 @@ class TextPreprocessor:
         self.word_to_idx = None
         
     def tokenize(self, text: str) -> List[str]:
-        """Tokenize and clean text"""
-        # Lowercase
+        # Lowercasing
         text = text.lower()
         
-        # Remove special characters and digits
+        # Removing special characters and digits
         text = re.sub(r'[^a-z\s]', ' ', text)
         
-        # Split into words
+        # Splitting into words
         words = text.split()
         
-        # Filter by length and stop words
+        # Filtering by length and stop words
         words = [w for w in words if len(w) >= self.min_word_length and w not in self.stop_words]
         
-        # Lemmatize
+        # Lemmatizing
         words = [self.lemmatizer.lemmatize(w) for w in words]
         
         return words
     
     def build_vocabulary(self, corpus: Dict[str, Dict], glove_path: str) -> Tuple[List[str], Dict[str, np.ndarray]]:
-        """Build vocabulary from corpus and load GloVe embeddings"""
         print("Building vocabulary...")
         
-        # Count word frequencies
+        # Counting word frequencies
         word_counts = Counter()
         print("Counting words in corpus...")
         for idx, (doc_id, doc_data) in enumerate(corpus.items()):
@@ -74,7 +67,7 @@ class TextPreprocessor:
         
         print(f"Total unique words before filtering: {len(word_counts)}")
         
-        # Load GloVe embeddings
+        # Loading GloVe embeddings
         print(f"Loading GloVe embeddings from {glove_path}...")
         glove_embeddings = {}
         
@@ -115,19 +108,19 @@ class TextPreprocessor:
         
         print(f"Loaded {len(glove_embeddings)} GloVe embeddings")
         
-        # Keep only words that exist in GloVe and are most frequent
+        # Keeping only words that exist in GloVe and are most frequent
         valid_words = [(word, count) for word, count in word_counts.items() 
                        if word in glove_embeddings]
         
-        # Sort by frequency and take top words
+        # Sorting by frequency and take top words
         valid_words.sort(key=lambda x: x[1], reverse=True)
         valid_words = valid_words[:self.max_vocab_size]
         
-        # Build vocabulary
+        # Building vocabulary
         self.vocab = [word for word, _ in valid_words]
         self.word_to_idx = {word: idx for idx, word in enumerate(self.vocab)}
         
-        # Get embeddings for vocabulary
+        # Getting embeddings for vocabulary
         vocab_embeddings = {word: glove_embeddings[word] for word in self.vocab}
         
         print(f"Final vocabulary size: {len(self.vocab)}")
@@ -135,7 +128,6 @@ class TextPreprocessor:
         return self.vocab, vocab_embeddings
     
     def text_to_bow(self, text: str) -> np.ndarray:
-        """Convert text to bag-of-words vector"""
         if self.vocab is None:
             raise ValueError("Vocabulary not built. Call build_vocabulary first.")
         
@@ -149,7 +141,6 @@ class TextPreprocessor:
         return bow
     
     def corpus_to_bow(self, corpus: Dict[str, Dict]) -> Tuple[np.ndarray, List[str]]:
-        """Convert entire corpus to BoW matrix"""
         print("Converting corpus to BoW representation...")
         
         doc_ids = list(corpus.keys())
@@ -161,7 +152,7 @@ class TextPreprocessor:
             text = corpus[doc_id]['text']
             bow_matrix[i] = self.text_to_bow(text)
         
-        # Remove documents with no words in vocabulary
+        # Removing documents with no words in vocabulary
         valid_docs = bow_matrix.sum(axis=1) > 0
         bow_matrix = bow_matrix[valid_docs]
         doc_ids = [doc_id for i, doc_id in enumerate(doc_ids) if valid_docs[i]]
@@ -171,7 +162,6 @@ class TextPreprocessor:
         return bow_matrix, doc_ids
     
     def save_vocabulary(self):
-        """Save vocabulary and word mappings"""
         vocab_data = {
             'vocab': self.vocab,
             'word_to_idx': self.word_to_idx
@@ -199,19 +189,19 @@ def prepare_bow_data(corpus: Dict):
         max_vocab_size=10000
     )
     
-    # Build vocabulary from corpus
+    # Building vocabulary from corpus
     vocab, vocab_embeddings = preprocessor.build_vocabulary(corpus, str(config.GLOVE_PATH))
     
-    # Save vocabulary
+    # Saving vocabulary
     preprocessor.save_vocabulary()
     
-    # Convert to BoW
+    # Converting to BoW
     bow_data, doc_ids = preprocessor.corpus_to_bow(corpus)
     
-    # Convert embeddings dict to array
+    # Converting embeddings dict to array
     embeddings = np.array([vocab_embeddings[word] for word in vocab])
     
-    # Save embeddings
+    # Saving embeddings
     np.save(config.WORD_EMBEDDINGS_PATH, embeddings)
     print(f"Word embeddings saved to {config.WORD_EMBEDDINGS_PATH}")
     
@@ -219,12 +209,12 @@ def prepare_bow_data(corpus: Dict):
 
 
 if __name__ == "__main__":
-    # Load saved corpus
+    # Loading saved corpus
     from dataset_loader import TRECCovidLoader
     
     corpus, _, _ = TRECCovidLoader.load_saved_data()
     
-    # Prepare BoW data
+    # Preparing BoW data
     bow_data, vocab, embeddings, doc_ids = prepare_bow_data(corpus)
     
     print("\nPreprocessing complete!")

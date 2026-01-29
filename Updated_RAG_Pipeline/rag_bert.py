@@ -1,6 +1,3 @@
-"""
-BERT-based RAG system using FAISS for efficient retrieval
-"""
 import numpy as np
 import faiss
 import pickle
@@ -10,8 +7,7 @@ import config
 
 
 class BERTRAGSystem:
-    """RAG system using BERT embeddings and FAISS index"""
-    
+  
     def __init__(self, embeddings: np.ndarray, doc_ids: List[str], 
                  corpus: Dict[str, Dict]):
         self.embeddings = embeddings
@@ -21,15 +17,14 @@ class BERTRAGSystem:
         self.embedding_dim = embeddings.shape[1]
         
     def build_index(self):
-        """Build FAISS index for efficient similarity search"""
         print(f"Building FAISS index with {len(self.embeddings)} vectors...")
         start_time = time.time()
         
-        # Normalize embeddings for cosine similarity
+        # Normalizing embeddings for cosine similarity
         embeddings_normalized = self.embeddings.astype('float32')
         faiss.normalize_L2(embeddings_normalized)
         
-        # Create FAISS index (Inner Product = Cosine Similarity after normalization)
+        # Creating FAISS index (Inner Product = Cosine Similarity after normalization)
         self.index = faiss.IndexFlatIP(self.embedding_dim)
         self.index.add(embeddings_normalized)
         
@@ -40,27 +35,18 @@ class BERTRAGSystem:
         return build_time
     
     def search(self, query_embedding: np.ndarray, k: int = 10) -> Tuple[List[str], List[float]]:
-        """
-        Search for top-k most similar documents
-        
-        Args:
-            query_embedding: Query embedding vector
-            k: Number of results to return
-        
-        Returns:
-            Tuple of (doc_ids, similarity_scores)
-        """
+
         if self.index is None:
             raise ValueError("Index not built. Call build_index() first.")
         
-        # Normalize query
+        # Normalizing query
         query_normalized = query_embedding.astype('float32').reshape(1, -1)
         faiss.normalize_L2(query_normalized)
         
-        # Search
+        # Searching
         similarities, indices = self.index.search(query_normalized, k)
         
-        # Get document IDs
+        # Getting document IDs
         doc_ids = [self.doc_ids[idx] for idx in indices[0]]
         scores = similarities[0].tolist()
         
@@ -68,17 +54,7 @@ class BERTRAGSystem:
     
     def batch_search(self, query_embeddings: np.ndarray, k: int = 10, 
                      show_progress: bool = True) -> Tuple[List[List[str]], List[List[float]]]:
-        """
-        Batch search for multiple queries
-        
-        Args:
-            query_embeddings: Array of query embeddings (n_queries, embedding_dim)
-            k: Number of results per query
-            show_progress: Whether to show progress bar
-        
-        Returns:
-            Tuple of (list of doc_id lists, list of score lists)
-        """
+
         if self.index is None:
             raise ValueError("Index not built. Call build_index() first.")
         
@@ -98,7 +74,6 @@ class BERTRAGSystem:
         return all_doc_ids, all_scores
     
     def save_index(self, path=None):
-        """Save FAISS index to disk"""
         if path is None:
             path = config.BERT_FAISS_INDEX
         
@@ -106,7 +81,6 @@ class BERTRAGSystem:
         print(f"FAISS index saved to {path}")
     
     def load_index(self, path=None):
-        """Load FAISS index from disk"""
         if path is None:
             path = config.BERT_FAISS_INDEX
         
@@ -116,33 +90,32 @@ class BERTRAGSystem:
 
 
 def build_bert_rag_system():
-    """Build and save BERT RAG system"""
     print("\n" + "="*80)
     print("BUILDING BERT RAG SYSTEM")
     print("="*80)
     
-    # Load embeddings
+    # Loading embeddings
     print("Loading BERT embeddings...")
     embeddings = np.load(config.BERT_EMBEDDINGS)
     
-    # Load document IDs
+    # Loading document IDs
     print("Loading document metadata...")
     with open(config.DATA_DIR / 'pipeline_metadata.pkl', 'rb') as f:
         metadata = pickle.load(f)
     doc_ids = metadata['doc_ids']
     
-    # Load corpus
+    # Loading corpus
     print("Loading corpus...")
     with open(config.DOCUMENTS_PATH, 'rb') as f:
         corpus = pickle.load(f)
     
-    # Initialize RAG system
+    # Initializing RAG system
     rag_system = BERTRAGSystem(embeddings, doc_ids, corpus)
     
-    # Build index
+    # Building index
     build_time = rag_system.build_index()
     
-    # Save index
+    # Saving index
     rag_system.save_index()
     
     print("\n" + "="*80)
@@ -156,19 +129,18 @@ def build_bert_rag_system():
 
 
 def test_bert_rag():
-    """Test BERT RAG system with sample queries"""
     print("\n" + "="*80)
     print("TESTING BERT RAG SYSTEM")
     print("="*80)
     
-    # Load system components
+    # Loading system components
     rag_system = build_bert_rag_system()
     
-    # Load test queries
+    # Loading test queries
     with open(config.QUERIES_PATH, 'rb') as f:
         queries = pickle.load(f)
     
-    # Generate query embeddings for a few test queries
+    # Generating query embeddings for a few test queries
     from bert_embeddings import BERTEmbeddingGenerator
     
     test_query_ids = list(queries.keys())[:5]  # Test with first 5 queries
@@ -177,7 +149,7 @@ def test_bert_rag():
     generator = BERTEmbeddingGenerator()
     query_embeddings, query_ids = generator.generate_query_embeddings(test_queries)
     
-    # Perform retrieval
+    # Performing retrieval
     print("\nPerforming retrieval for test queries...")
     start_time = time.time()
     doc_ids_list, scores_list = rag_system.batch_search(query_embeddings, k=5, show_progress=True)
@@ -186,7 +158,7 @@ def test_bert_rag():
     print(f"\nRetrieval completed in {retrieval_time:.2f} seconds")
     print(f"Average time per query: {retrieval_time / len(test_queries):.4f} seconds")
     
-    # Display results
+    # Displaying results
     print("\n" + "="*80)
     print("SAMPLE RETRIEVAL RESULTS")
     print("="*80)
@@ -203,10 +175,8 @@ def test_bert_rag():
 
 
 if __name__ == "__main__":
-    # Build the system
     rag_system = build_bert_rag_system()
     
-    # Run tests
     print("\nWould you like to test the system? (This will generate query embeddings)")
     # Uncomment to run tests:
     # test_bert_rag()

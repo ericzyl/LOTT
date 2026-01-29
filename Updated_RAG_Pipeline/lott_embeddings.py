@@ -1,6 +1,3 @@
-"""
-LOTT (Linear Optimal Topic Transport) embedding generation
-"""
 import numpy as np
 import ot
 from typing import List
@@ -8,17 +5,6 @@ import config
 
 
 def makeGaussian1D(size, fwhm=3, center=None):
-    """
-    Generate a 1D Gaussian distribution.
-    
-    Args:
-        size: Length of the output vector
-        fwhm: Full-Width-Half-Maximum, defines the width of the Gaussian
-        center: Center of the Gaussian (if None, centered in middle)
-    
-    Returns:
-        Normalized Gaussian distribution
-    """
     center = center if center is not None else size // 2
     
     x = np.arange(size)
@@ -28,16 +14,7 @@ def makeGaussian1D(size, fwhm=3, center=None):
 
 
 def lot_embedding(coupling_matrix, lda_centers):
-    """
-    Compute LOT embedding from optimal transport coupling
-    
-    Args:
-        coupling_matrix: Optimal transport plan (n_topics, n_topics)
-        lda_centers: Topic embeddings in word space (n_topics, embedding_dim)
-    
-    Returns:
-        Flattened LOT embedding
-    """
+
     T_mu_sigma = []
     
     for i in range(coupling_matrix.shape[0]):
@@ -46,7 +23,7 @@ def lot_embedding(coupling_matrix, lda_centers):
         if source_weight == 0:
             y_coor = np.zeros(lda_centers.shape[1], dtype=float)
         else:
-            # Get nonzero indices for efficiency
+            # Getting nonzero indices for efficiency
             nonzero_indices = np.where(coupling_matrix[i] > 0)[0]
             
             # Vectorized barycentric projection
@@ -65,19 +42,7 @@ def create_lot_embeddings(topic_proportions: np.ndarray,
                           lda_centers: np.ndarray,
                           topic_cost_matrix: np.ndarray,
                           show_progress: bool = True) -> List[np.ndarray]:
-    """
-    Create LOTT embeddings for multiple documents
-    
-    Args:
-        topic_proportions: Topic distributions for documents (n_docs, n_topics)
-        reference_dist: Reference Gaussian distribution (n_topics,)
-        lda_centers: Topic centers in embedding space (n_topics, embedding_dim)
-        topic_cost_matrix: Cost matrix between topics (n_topics, n_topics)
-        show_progress: Whether to show progress bar
-    
-    Returns:
-        List of LOT embeddings
-    """
+
     lot_embeddings = []
     
     if show_progress:
@@ -87,24 +52,24 @@ def create_lot_embeddings(topic_proportions: np.ndarray,
         if show_progress and i % 5000 == 0:
             print(f"  Progress: {i}/{len(topic_proportions)} documents")
         
-        # Get topic distribution for this document
+        # Getting topic distribution for this document
         doc_topics = topic_proportions[i].reshape(-1)
         
-        # Normalize if needed
+        # Normalizing if needed
         if doc_topics.sum() > 0:
             doc_topics = doc_topics / doc_topics.sum()
         else:
-            # If no topics, use uniform distribution
+            # If no topics, using uniform distribution
             doc_topics = np.ones_like(doc_topics) / len(doc_topics)
         
-        # Compute optimal transport plan
+        # Computing optimal transport plan
         coupling = ot.emd(
             doc_topics.reshape(-1), 
             reference_dist.reshape(-1), 
             topic_cost_matrix
         )
         
-        # Create LOT embedding
+        # Creating LOT embedding
         lot_emb = lot_embedding(coupling, lda_centers)
         lot_embeddings.append(lot_emb)
     
@@ -112,8 +77,7 @@ def create_lot_embeddings(topic_proportions: np.ndarray,
 
 
 class LOTTEmbeddingGenerator:
-    """Generate LOTT embeddings for documents"""
-    
+  
     def __init__(self, lda_model, lda_centers, topic_cost_matrix, gaussian_fwhm=25):
         self.lda_model = lda_model
         self.lda_centers = lda_centers
@@ -121,38 +85,19 @@ class LOTTEmbeddingGenerator:
         self.gaussian_fwhm = gaussian_fwhm
         self.n_topics = lda_centers.shape[0]
         
-        # Create reference Gaussian distribution
+        # Creating reference Gaussian distribution
         self.reference_dist = makeGaussian1D(
             size=self.n_topics, 
             fwhm=self.gaussian_fwhm
         )
     
     def infer_topics(self, bow_data: np.ndarray) -> np.ndarray:
-        """
-        Infer topic proportions for BoW data
-        
-        Args:
-            bow_data: Bag-of-words matrix (n_docs, vocab_size)
-        
-        Returns:
-            Topic proportions (n_docs, n_topics)
-        """
         print("Inferring topic proportions...")
         topic_proportions = self.lda_model.transform(bow_data)
         return topic_proportions
     
     def generate_embeddings(self, topic_proportions: np.ndarray, 
                            show_progress: bool = True) -> np.ndarray:
-        """
-        Generate LOTT embeddings from topic proportions
-        
-        Args:
-            topic_proportions: Topic distributions (n_docs, n_topics)
-            show_progress: Whether to show progress bar
-        
-        Returns:
-            LOTT embeddings (n_docs, n_topics * embedding_dim)
-        """
         embeddings = create_lot_embeddings(
             topic_proportions,
             self.reference_dist,
@@ -165,20 +110,10 @@ class LOTTEmbeddingGenerator:
     
     def generate_from_bow(self, bow_data: np.ndarray, 
                          show_progress: bool = True) -> tuple:
-        """
-        Generate LOTT embeddings directly from BoW data
-        
-        Args:
-            bow_data: Bag-of-words matrix
-            show_progress: Whether to show progress
-        
-        Returns:
-            Tuple of (lott_embeddings, topic_proportions)
-        """
-        # Infer topics
+        # Inferring topics
         topic_proportions = self.infer_topics(bow_data)
         
-        # Generate LOTT embeddings
+        # Generating LOTT embeddings
         embeddings = self.generate_embeddings(topic_proportions, show_progress)
         
         return embeddings, topic_proportions
@@ -212,7 +147,6 @@ def generate_and_save_lott_embeddings(bow_all: np.ndarray):
     return all_embeddings, all_topics
 
 def load_lott_embeddings():
-    """Load saved LOTT embeddings"""
     print("Loading LOTT embeddings...")
     
     embeddings = np.load(config.LOTT_EMBEDDINGS)
@@ -228,7 +162,7 @@ if __name__ == "__main__":
     from preprocessing import TextPreprocessor
     import pickle
     
-    # Load saved BoW data (you'll need to save these in preprocessing step)
+    # Loading saved BoW data (you'll need to save these in preprocessing step)
     print("This script requires preprocessed BoW data.")
     print("Run the full pipeline script to generate LOTT embeddings.")
     

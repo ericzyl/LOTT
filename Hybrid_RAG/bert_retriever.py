@@ -1,6 +1,3 @@
-"""
-BERT-based retrieval with FAISS
-"""
 import numpy as np
 import faiss
 import pickle
@@ -10,8 +7,7 @@ import config
 
 
 class BERTRetriever:
-    """BERT embedding + FAISS retrieval"""
-    
+
     def __init__(self, dataset_name: str):
         self.dataset_name = dataset_name
         self.cache = config.get_cache_paths(dataset_name)
@@ -21,8 +17,7 @@ class BERTRetriever:
         self.doc_embeddings = None
         
     def build_index(self, corpus: Dict, doc_ids: List[str]):
-        """Build BERT embeddings and FAISS index"""
-        
+ 
         # Load model
         print(f"Loading BERT model: {config.BERT_MODEL}...")
         self.model = SentenceTransformer(config.BERT_MODEL)
@@ -66,8 +61,7 @@ class BERTRetriever:
         print(f"BERT retriever ready! {self.index.ntotal} documents indexed.")
     
     def encode_queries(self, queries: Dict) -> Tuple[np.ndarray, List[str]]:
-        """Encode queries with BERT"""
-        
+ 
         query_ids = list(queries.keys())
         
         # Check cache
@@ -92,13 +86,7 @@ class BERTRetriever:
         return query_embeddings, query_ids
     
     def retrieve(self, query_embeddings: np.ndarray, k: int = 100) -> Tuple[List[List[str]], List[List[float]]]:
-        """
-        Retrieve top-k documents for each query
-        
-        Returns:
-            retrieved_doc_ids: List of lists of doc IDs
-            scores: List of lists of similarity scores
-        """
+
         print(f"Retrieving top-{k} documents for {len(query_embeddings)} queries...")
         
         # Normalize queries

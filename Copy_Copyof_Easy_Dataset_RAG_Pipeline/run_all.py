@@ -1,19 +1,13 @@
-"""
-Complete execution script for RAG system comparison
-Runs entire pipeline from data loading to evaluation
-"""
 import sys
 import time
 from pathlib import Path
 
 def print_section(title):
-    """Print a section header"""
     print("\n" + "="*80)
     print(f"  {title}")
     print("="*80 + "\n")
 
 def check_glove_embeddings():
-    """Check if GloVe embeddings are available"""
     import config
     
     if not Path(config.GLOVE_PATH).exists():
@@ -27,71 +21,66 @@ def check_glove_embeddings():
     return True
 
 def run_pipeline():
-    """Run the complete pipeline"""
     print_section("STEP 1/5: Running Complete Pipeline")
     
     from pipeline import run_full_pipeline
     
     try:
         pipeline_data = run_full_pipeline()
-        print("✓ Pipeline completed successfully!")
+        print("Pipeline completed successfully!")
         return True
     except Exception as e:
-        print(f"✗ Pipeline failed: {e}")
+        print(f"Pipeline failed: {e}")
         import traceback
         traceback.print_exc()
         return False
 
 def build_bert_rag():
-    """Build BERT RAG system"""
     print_section("STEP 2/5: Building BERT RAG System")
     
     from rag_bert import build_bert_rag_system
     
     try:
         bert_system = build_bert_rag_system()
-        print("✓ BERT RAG system built successfully!")
+        print("BERT RAG system built successfully!")
         return True
     except Exception as e:
-        print(f"✗ BERT RAG build failed: {e}")
+        print(f"BERT RAG build failed: {e}")
         import traceback
         traceback.print_exc()
         return False
 
 def build_lott_rag():
-    """Build LOTT RAG system"""
     print_section("STEP 3/5: Building LOTT RAG System")
     
     from rag_lott import build_lott_rag_system
     
     try:
         lott_system = build_lott_rag_system()
-        print("✓ LOTT RAG system built successfully!")
+        print("LOTT RAG system built successfully!")
         return True
     except Exception as e:
-        print(f"✗ LOTT RAG build failed: {e}")
+        print(f"LOTT RAG build failed: {e}")
         import traceback
         traceback.print_exc()
         return False
 
 def run_evaluation():
-    """Run evaluation"""
     print_section("STEP 4/5: Running Evaluation")
     
     from evaluate_rag import run_full_evaluation
     
     try:
         results = run_full_evaluation()
-        print("✓ Evaluation completed successfully!")
+        print("Evaluation completed successfully!")
         return True, results
     except Exception as e:
-        print(f"✗ Evaluation failed: {e}")
+        print(f"Evaluation failed: {e}")
         import traceback
         traceback.print_exc()
         return False, None
 
 def print_summary(results):
-    """Print final summary"""
     print_section("STEP 5/5: Summary")
     
     if results is None:
@@ -128,7 +117,6 @@ def print_summary(results):
     print(f"  - Plots: results/comparison_plot.png")
 
 def main():
-    """Main execution function"""
     start_time = time.time()
     
     print("\n" + "="*80)

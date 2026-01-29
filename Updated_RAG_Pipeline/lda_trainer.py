@@ -1,7 +1,3 @@
-"""
-LDA model training and persistence
-Handles fitting LDA, computing topic costs, and saving artifacts
-"""
 import numpy as np
 import pickle
 import lda
@@ -10,7 +6,6 @@ import config
 
 
 def sparse_ot(weights1, weights2, M):
-    """Compute optimal transport for sparse distributions"""
     import ot
     
     weights1 = weights1 / weights1.sum()
@@ -27,8 +22,7 @@ def sparse_ot(weights1, weights2, M):
 
 
 class LDATrainer:
-    """Handles LDA training and artifact persistence"""
-    
+  
     def __init__(self, n_topics=100, n_iterations=1500, random_state=42):
         self.n_topics = n_topics
         self.n_iterations = n_iterations
@@ -49,7 +43,7 @@ class LDATrainer:
         """
         print(f"Training LDA with {self.n_topics} topics...")
         
-        # Initialize and fit LDA model
+        # Initializing and fitting LDA model
         self.model = lda.LDA(
             n_topics=self.n_topics,
             n_iter=self.n_iterations,
@@ -58,21 +52,20 @@ class LDATrainer:
         
         self.model.fit(bow_data)
         
-        # Get topic-word distributions
+        # Getting topic-word distributions
         self.topics = self.model.topic_word_
         
-        # Compute LDA centers (topics in embedding space)
+        # Computing LDA centers (topics in embedding space)
         self.lda_centers = np.matmul(self.topics, embeddings)
         
         print(f"\nLDA Centers shape: {self.lda_centers.shape}")
         
-        # Display top words for each topic
+        # Displaying top words for each topic
         self._print_top_words(vocab)
         
         return self.topics, self.lda_centers
     
     def _print_top_words(self, vocab: list, n_top_words=10):
-        """Print top words for each topic"""
         print("\n" + "="*80)
         print("TOP WORDS PER TOPIC")
         print("="*80)
@@ -80,7 +73,7 @@ class LDATrainer:
         vocab_array = np.array(vocab)
         
         for i, topic_dist in enumerate(self.topics):
-            if i >= 10:  # Print only first 10 topics for brevity
+            if i >= 10:  # Printing only first 10 topics for brevity
                 print(f"... and {self.n_topics - 10} more topics")
                 break
             
@@ -90,22 +83,17 @@ class LDATrainer:
         print("="*80 + "\n")
     
     def sparsify_topics(self, n_words_keep=20):
-        """
-        Reduce topics to top-N words for sparse representation
-        
-        Args:
-            n_words_keep: Number of top words to keep per topic
-        """
+
         print(f"Sparsifying topics to top-{n_words_keep} words...")
         
         sparse_topics = self.topics.copy()
         
         for k in range(self.n_topics):
-            # Get indices to zero out (all except top n_words_keep)
+            # Getting indices to zero out (all except top n_words_keep)
             to_zero_idx = np.argsort(-sparse_topics[k])[n_words_keep:]
             sparse_topics[k][to_zero_idx] = 0
             
-            # Renormalize
+            # Renormalizing
             if sparse_topics[k].sum() > 0:
                 sparse_topics[k] = sparse_topics[k] / sparse_topics[k].sum()
         
@@ -114,22 +102,16 @@ class LDATrainer:
               f"{np.mean((self.topics > 0).sum(axis=1)):.1f}")
     
     def compute_topic_cost_matrix(self, word_embeddings: np.ndarray, p=1):
-        """
-        Compute topic-to-topic transport cost matrix
-        
-        Args:
-            word_embeddings: Word embeddings (vocab_size, embedding_dim)
-            p: Power for distance (1 for W1, 2 for W2)
-        """
+
         print("Computing topic-topic cost matrix...")
         
-        # Compute word-to-word cost
+        # Computing word-to-word cost
         cost_embeddings = euclidean_distances(word_embeddings, word_embeddings) ** p
         
-        # Initialize topic-topic cost matrix
+        # Initializing topic-topic cost matrix
         self.topic_cost_matrix = np.zeros((self.n_topics, self.n_topics))
         
-        # Compute only upper triangle (symmetric matrix)
+        # Computing only upper triangle (symmetric matrix)
         print("Computing topic costs...")
         for i in range(self.n_topics):
             if i % 10 == 0:
@@ -141,7 +123,7 @@ class LDATrainer:
                     cost_embeddings
                 )
         
-        # Make symmetric
+        # Making symmetric
         self.topic_cost_matrix = self.topic_cost_matrix + self.topic_cost_matrix.T
         
         print(f"Topic cost matrix shape: {self.topic_cost_matrix.shape}")
@@ -150,19 +132,11 @@ class LDATrainer:
         return self.topic_cost_matrix
     
     def infer_topics(self, bow_data: np.ndarray) -> np.ndarray:
-        """
-        Infer topic proportions for new documents
-        
-        Args:
-            bow_data: BoW matrix (n_docs, vocab_size)
-            
-        Returns:
-            Topic proportions (n_docs, n_topics)
-        """
+
         if self.model is None:
             raise ValueError("Model not trained. Call fit() first.")
         
-        # Transform documents to topic space
+        # Transforming documents to topic space
         topic_proportions = self.model.transform(bow_data)
         
         return topic_proportions
@@ -171,17 +145,17 @@ class LDATrainer:
         """Save all LDA artifacts to disk"""
         print("Saving LDA artifacts...")
         
-        # Save LDA model
+        # Saving LDA model
         with open(config.LDA_MODEL_PATH, 'wb') as f:
             pickle.dump(self.model, f)
         
-        # Save topics
+        # Saving topics
         np.save(config.LDA_TOPICS_PATH, self.topics)
         
-        # Save LDA centers
+        # Saving LDA centers
         np.save(config.LDA_CENTERS_PATH, self.lda_centers)
         
-        # Save topic cost matrix
+        # Saving topic cost matrix
         np.save(config.TOPIC_COST_MATRIX_PATH, self.topic_cost_matrix)
         
         print("Artifacts saved:")
@@ -192,7 +166,6 @@ class LDATrainer:
     
     @staticmethod
     def load_artifacts():
-        """Load saved LDA artifacts"""
         print("Loading LDA artifacts...")
         
         with open(config.LDA_MODEL_PATH, 'rb') as f:
@@ -211,31 +184,24 @@ class LDATrainer:
 
 
 def train_and_save_lda(bow_train: np.ndarray, embeddings: np.ndarray, vocab: list):
-    """
-    Main function to train LDA and save all artifacts
-    
-    Args:
-        bow_train: Training BoW data
-        embeddings: Word embeddings
-        vocab: Vocabulary list
-    """
-    # Initialize trainer
+
+    # Initializing trainer
     trainer = LDATrainer(
         n_topics=config.N_TOPICS,
         n_iterations=config.LDA_ITERATIONS,
         random_state=config.LDA_RANDOM_STATE
     )
     
-    # Fit LDA
+    # Fitting LDA
     topics, lda_centers = trainer.fit(bow_train, embeddings, vocab)
     
-    # Sparsify topics
+    # Sparsifying topics
     trainer.sparsify_topics(n_words_keep=config.N_TOP_WORDS)
     
-    # Compute topic cost matrix
+    # Computing topic cost matrix
     trainer.compute_topic_cost_matrix(embeddings, p=config.P_NORM)
     
-    # Save all artifacts
+    # Saving all artifacts
     trainer.save_artifacts()
     
     return trainer
@@ -245,14 +211,14 @@ if __name__ == "__main__":
     from dataset_loader import TRECCovidLoader
     from preprocessing import prepare_bow_data
     
-    # Load data
+    # Loading data
     print("Loading data...")
     corpus, _, _ = TRECCovidLoader.load_saved_data()
     
-    # Prepare BoW data
+    # Preparing BoW data
     bow_data, vocab, embeddings, _ = prepare_bow_data(corpus)
     
-    # Train and save LDA
+    # Training and saving LDA
     trainer = train_and_save_lda(bow_data, embeddings, vocab)
     
     print("\n" + "="*80)

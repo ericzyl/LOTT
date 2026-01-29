@@ -1,7 +1,3 @@
-"""
-LOTT-based reranking
-Two methods: Embedding-based and OT-based
-"""
 import numpy as np
 import ot
 from typing import List, Tuple, Dict
@@ -10,7 +6,6 @@ import config
 
 
 def makeGaussian1D(size, fwhm=25, center=None):
-    """Generate 1D Gaussian distribution"""
     center = center if center is not None else size // 2
     x = np.arange(size)
     gaussian = np.exp(-4 * np.log(2) * ((x - center)**2) / fwhm**2)
@@ -18,7 +13,6 @@ def makeGaussian1D(size, fwhm=25, center=None):
 
 
 def lot_embedding(coupling_matrix, lda_centers):
-    """Compute LOT embedding from OT coupling"""
     T_mu_sigma = []
     
     for i in range(coupling_matrix.shape[0]):
@@ -38,7 +32,6 @@ def lot_embedding(coupling_matrix, lda_centers):
 
 
 class LOTTReranker:
-    """LOTT-based reranking with two methods"""
     
     def __init__(self, dataset_name: str, lda_module):
         self.dataset_name = dataset_name
@@ -52,7 +45,6 @@ class LOTTReranker:
         self.query_lott_embs = None
         
     def prepare_documents(self, bow_data: np.ndarray):
-        """Prepare document topic proportions and LOTT embeddings"""
         
         # Infer topic proportions
         self.doc_topic_props = self.lda_module.infer_topics(bow_data, 'topic_proportions')
@@ -73,8 +65,7 @@ class LOTTReranker:
         print(f"Document LOTT embeddings: {self.doc_lott_embs.shape}")
     
     def prepare_queries(self, queries: Dict, corpus: Dict, vocab_data: dict):
-        """Prepare query topic proportions and LOTT embeddings"""
-        
+
         # Need to convert queries to BoW first
         from preprocessing import TextPreprocessor
         
@@ -110,7 +101,6 @@ class LOTTReranker:
         return query_ids
     
     def _create_lott_embeddings(self, topic_proportions: np.ndarray) -> np.ndarray:
-        """Create LOTT embeddings from topic proportions"""
         lot_embeddings = []
         
         for i in range(len(topic_proportions)):
@@ -138,18 +128,7 @@ class LOTTReranker:
     
     def rerank_embedding_based(self, query_idx: int, retrieved_doc_ids: List[str], 
                                 doc_id_to_idx: Dict, k: int) -> List[str]:
-        """
-        Rerank using LOTT embedding cosine similarity
-        
-        Args:
-            query_idx: Index of query
-            retrieved_doc_ids: List of retrieved doc IDs from BERT
-            doc_id_to_idx: Mapping from doc ID to index
-            k: Number of top results to return
-        
-        Returns:
-            Reranked doc IDs (top-k)
-        """
+
         query_emb = self.query_lott_embs[query_idx].reshape(1, -1)
         
         # Get embeddings for retrieved docs
@@ -167,18 +146,7 @@ class LOTTReranker:
     
     def rerank_ot_based(self, query_idx: int, retrieved_doc_ids: List[str],
                         doc_id_to_idx: Dict, k: int) -> List[str]:
-        """
-        Rerank using optimal transport distance between topic distributions
-        
-        Args:
-            query_idx: Index of query
-            retrieved_doc_ids: List of retrieved doc IDs from BERT
-            doc_id_to_idx: Mapping from doc ID to index
-            k: Number of top results to return
-        
-        Returns:
-            Reranked doc IDs (top-k)
-        """
+
         query_topics = self.query_topic_props[query_idx]
         query_topics = query_topics / query_topics.sum() if query_topics.sum() > 0 else query_topics
         

@@ -1,6 +1,3 @@
-"""
-Evaluation metrics for retrieval
-"""
 import numpy as np
 from typing import List, Dict
 from collections import defaultdict
@@ -8,14 +5,12 @@ import config
 
 
 def compute_precision_at_k(retrieved: List[str], relevant: set, k: int) -> float:
-    """Compute Precision@K"""
     retrieved_k = retrieved[:k]
     relevant_retrieved = sum(1 for doc_id in retrieved_k if doc_id in relevant)
     return relevant_retrieved / k if k > 0 else 0.0
 
 
 def compute_recall_at_k(retrieved: List[str], relevant: set, k: int) -> float:
-    """Compute Recall@K"""
     if len(relevant) == 0:
         return 0.0
     retrieved_k = retrieved[:k]
@@ -24,7 +19,6 @@ def compute_recall_at_k(retrieved: List[str], relevant: set, k: int) -> float:
 
 
 def compute_ndcg_at_k(retrieved: List[str], relevance_scores: Dict[str, float], k: int) -> float:
-    """Compute Normalized Discounted Cumulative Gain@K"""
     retrieved_k = retrieved[:k]
     
     # DCG
@@ -41,7 +35,6 @@ def compute_ndcg_at_k(retrieved: List[str], relevance_scores: Dict[str, float], 
 
 
 def compute_mrr(retrieved: List[str], relevant: set) -> float:
-    """Compute Mean Reciprocal Rank"""
     for i, doc_id in enumerate(retrieved, 1):
         if doc_id in relevant:
             return 1.0 / i
@@ -52,18 +45,7 @@ def evaluate_retrieval(all_retrieved: List[List[str]],
                        query_ids: List[str],
                        qrels: Dict[str, Dict[str, float]],
                        method_name: str) -> Dict:
-    """
-    Evaluate retrieval results
-    
-    Args:
-        all_retrieved: List of retrieved doc lists for each query
-        query_ids: List of query IDs
-        qrels: Relevance judgments {query_id: {doc_id: score}}
-        method_name: Name of the method (for display)
-    
-    Returns:
-        Dictionary of metrics
-    """
+
     print(f"\nEvaluating {method_name}...")
     
     metrics = defaultdict(list)
