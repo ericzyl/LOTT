@@ -1,0 +1,19 @@
+beir
+datasets
+# faiss-cpu
+# For GPU support, replace above with:
+faiss-gpu
+huggingface-hub
+langchain
+langchain-community
+langchain-core
+lda
+matplotlib
+nltk
+numpy
+POT
+scikit-learn
+scipy
+sentence-transformers
+tqdm
+transformers

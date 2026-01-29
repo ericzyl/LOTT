@@ -1,0 +1,21 @@
+# Data and Embeddings
+data/
+Raw_Datasets/
+
+# Pycache files
+__pycache__/
+
+# DS Store files
+.DS_Store
+
+# RAG Pipeline Generated Folders
+RAG_BeIR_Pipeline/*
+!RAG_BeIR_Pipeline/*.py
+
+# Hybrid RAG Generated Folders
+Hybriid_RAG/*
+!Hybrid_RAG/*.py
+
+# Results CSV files
+*.csv
+*.npz

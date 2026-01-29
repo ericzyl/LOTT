@@ -7,6 +7,7 @@ from scipy.io import loadmat
 from nltk.corpus import stopwords
 from nltk.stem.snowball import SnowballStemmer
 from sklearn.manifold import MDS
+from sklearn.decomposition import LatentDirichletAllocation
 
 
 def load_wmd_data(path):
@@ -162,6 +163,37 @@ def fit_topics(data, embeddings, vocab, K):
 
     return topics, lda_centers, topic_proportions
 
+# def fit_topics(data, embeddings, vocab, K):
+#     """Fit a topic model with convergence checking."""
+#     model = LatentDirichletAllocation(
+#         n_components=K,
+#         max_iter=1500,
+#         random_state=1,
+#         evaluate_every=10,  # Check every 10 iterations
+#         perp_tol=1e-5,      # Convergence tolerance
+#         verbose=1,          # Shows progress and convergence
+#         n_jobs=1           # Multi-threaded!
+#     )
+    
+#     model.fit(data)
+    
+#     topics = model.components_
+#     topics = topics / topics.sum(axis=1, keepdims=True)  # Normalize
+    
+#     lda_centers = np.matmul(topics, embeddings)
+    
+#     # Print topics
+#     print('LDA topics')
+#     n_top_words = 20
+#     for i, topic_dist in enumerate(topics):
+#         topic_words = np.array(vocab)[np.argsort(topic_dist)][:-(n_top_words + 1):-1]
+#         print('Topic {}: {}'.format(i, ' '.join(topic_words)))
+#     print('\n')
+    
+#     topic_proportions = model.transform(data)
+    
+#     return topics, lda_centers, topic_proportions
+
 def loader(data_path,
            embeddings_path,
            p=1,
@@ -214,6 +246,7 @@ def loader(data_path,
            'embeddings': embeddings,
            'topics': topics, 'proportions': topic_proportions,
            'cost_E': cost_embeddings, 'cost_T': cost_topics,
-           'lda_C': lda_centers}
+           'lda_C': lda_centers,
+           'vocab': vocab} # Vocabulary returned additionally here as it'll be required for BERT Embeddings
 
     return out
