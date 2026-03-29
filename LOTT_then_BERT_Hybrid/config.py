@@ -1,7 +1,7 @@
 from pathlib import Path
 
 # PROJECT_ROOT = Path(__file__).parent.parent
-PROJECT_ROOT = "/content/drive/MyDrive/LOTT"
+PROJECT_ROOT = Path("/content/drive/MyDrive/LOTT")
 # DATA_DIR = PROJECT_ROOT / "data"
 # CACHE_DIR = PROJECT_ROOT / "LOTT_then_BERT_Hybrid/cache"
 # RESULTS_DIR = PROJECT_ROOT / "LOTT_then_BERT_Hybrid/results"
