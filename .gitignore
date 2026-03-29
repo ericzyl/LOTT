@@ -19,3 +19,7 @@ Hybriid_RAG/*
 # Results CSV files
 *.csv
 *.npz
+
+# Results and Cache Folders
+results/
+cache/

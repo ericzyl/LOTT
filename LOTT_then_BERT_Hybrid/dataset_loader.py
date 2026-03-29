@@ -1,0 +1,72 @@
+import pickle
+from typing import Dict, Tuple
+
+import config
+
+
+def load_msmarco() -> Tuple[Dict, Dict, Dict]:
+    from beir import util
+    from beir.datasets.data_loader import GenericDataLoader
+
+    print("Loading MS-MARCO dataset...")
+
+    cache = config.get_cache_paths('msmarco')
+    if cache['corpus'].exists() and cache['queries'].exists() and cache['qrels'].exists():
+        print("Loading corpus/queries/qrels from cache...")
+        with open(cache['corpus'], 'rb') as f:
+            corpus = pickle.load(f)
+        with open(cache['queries'], 'rb') as f:
+            queries = pickle.load(f)
+        with open(cache['qrels'], 'rb') as f:
+            qrels = pickle.load(f)
+        print(f"Cached: {len(corpus)} docs, {len(queries)} queries, {len(qrels)} qrels")
+        return corpus, queries, qrels
+
+    url = "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/msmarco.zip"
+    data_path = util.download_and_unzip(url, str(config.DATA_DIR))
+    beir_corpus, beir_queries, beir_qrels = GenericDataLoader(
+        data_folder=data_path
+    ).load(split="dev")
+
+    print(f"Raw corpus size: {len(beir_corpus)}")
+
+    corpus_items = list(beir_corpus.items())
+    if config.MAX_DOCS is not None:
+        corpus_items = corpus_items[: config.MAX_DOCS]
+        print(f"Capped to {len(corpus_items)} documents")
+
+    corpus = {}
+    for idx, (doc_id, doc_data) in enumerate(corpus_items):
+        if idx % 100_000 == 0:
+            print(f"  Processing doc {idx}/{len(corpus_items)}")
+        title = doc_data.get('title', '')
+        text  = doc_data.get('text', '')
+        full_text = f"{title}. {text}" if title else text
+        corpus[doc_id] = {'text': full_text, 'title': title, 'doc_id': doc_id}
+
+    queries = beir_queries
+    qrels   = beir_qrels
+
+    print("Caching processed dataset...")
+    with open(cache['corpus'], 'wb') as f:
+        pickle.dump(corpus, f)
+    with open(cache['queries'], 'wb') as f:
+        pickle.dump(queries, f)
+    with open(cache['qrels'], 'wb') as f:
+        pickle.dump(qrels, f)
+
+    print(f"Loaded: {len(corpus)} docs, {len(queries)} queries, {len(qrels)} qrels")
+    return corpus, queries, qrels
+
+
+def load_dataset(dataset_name: str) -> Tuple[Dict, Dict, Dict]:
+    if dataset_name == "msmarco":
+        return load_msmarco()
+    raise ValueError(f"Unknown dataset '{dataset_name}'. Available: {config.AVAILABLE_DATASETS}")
+
+
+if __name__ == "__main__":
+    corpus, queries, qrels = load_dataset("msmarco")
+    print(f"\nDocuments : {len(corpus)}")
+    print(f"Queries   : {len(queries)}")
+    print(f"Qrels     : {len(qrels)}")
