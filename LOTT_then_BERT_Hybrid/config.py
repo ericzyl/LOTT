@@ -1,9 +1,13 @@
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).parent.parent
-DATA_DIR = PROJECT_ROOT / "data"
-CACHE_DIR = PROJECT_ROOT / "LOTT_then_BERT_Hybrid/cache"
-RESULTS_DIR = PROJECT_ROOT / "LOTT_then_BERT_Hybrid/results"
+# PROJECT_ROOT = Path(__file__).parent.parent
+PROJECT_ROOT = "/content/drive/MyDrive/LOTT"
+# DATA_DIR = PROJECT_ROOT / "data"
+# CACHE_DIR = PROJECT_ROOT / "LOTT_then_BERT_Hybrid/cache"
+# RESULTS_DIR = PROJECT_ROOT / "LOTT_then_BERT_Hybrid/results"
+DATA_DIR = PROJECT_ROOT
+CACHE_DIR = PROJECT_ROOT / "cache"
+RESULTS_DIR = PROJECT_ROOT / "results"
 
 for dir_path in [DATA_DIR, CACHE_DIR, RESULTS_DIR]:
     dir_path.mkdir(exist_ok=True, parents=True)
