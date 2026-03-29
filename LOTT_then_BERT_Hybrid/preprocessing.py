@@ -7,6 +7,8 @@ import numpy as np
 import nltk
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
+from scipy.sparse import lil_matrix, csr_matrix
+from scipy.sparse import save_npz, load_npz
 
 import config
 
@@ -91,18 +93,36 @@ class TextPreprocessor:
                 bow[self.word_to_idx[w]] += 1
         return bow
 
-    def corpus_to_bow(self, corpus: Dict[str, Dict]) -> Tuple[np.ndarray, List[str]]:
-        print(f"Converting {len(corpus)} documents to BoW...")
+    # def corpus_to_bow(self, corpus: Dict[str, Dict]) -> Tuple[np.ndarray, List[str]]:
+    #     print(f"Converting {len(corpus)} documents to BoW...")
+    #     doc_ids = list(corpus.keys())
+    #     matrix  = np.zeros((len(doc_ids), len(self.vocab)), dtype=np.int32)
+    #     for i, doc_id in enumerate(doc_ids):
+    #         if i % 10_000 == 0:
+    #             print(f"  BoW conversion: {i}/{len(doc_ids)}")
+    #         matrix[i] = self.text_to_bow(corpus[doc_id]['text'])
+    #     valid    = matrix.sum(axis=1) > 0
+    #     matrix   = matrix[valid]
+    #     doc_ids  = [d for d, keep in zip(doc_ids, valid) if keep]
+    #     print(f"Valid documents after BoW: {len(doc_ids)}")
+    #     return matrix, doc_ids
+    def corpus_to_bow(self, corpus):
+        print(f"Converting {len(corpus)} documents to BoW (sparse)...")
         doc_ids = list(corpus.keys())
-        matrix  = np.zeros((len(doc_ids), len(self.vocab)), dtype=np.int32)
+        matrix = lil_matrix((len(doc_ids), len(self.vocab)), dtype=np.int32)
+        
         for i, doc_id in enumerate(doc_ids):
             if i % 10_000 == 0:
                 print(f"  BoW conversion: {i}/{len(doc_ids)}")
-            matrix[i] = self.text_to_bow(corpus[doc_id]['text'])
-        valid    = matrix.sum(axis=1) > 0
-        matrix   = matrix[valid]
-        doc_ids  = [d for d, keep in zip(doc_ids, valid) if keep]
-        print(f"Valid documents after BoW: {len(doc_ids)}")
+            for word in self.tokenize(corpus[doc_id]['text']):
+                if word in self.word_to_idx:
+                    matrix[i, self.word_to_idx[word]] += 1
+        
+        matrix = matrix.tocsr()
+        valid = np.array(matrix.sum(axis=1)).flatten() > 0
+        matrix = matrix[valid]
+        doc_ids = [d for d, keep in zip(doc_ids, valid) if keep]
+        print(f"Valid documents: {len(doc_ids)}")
         return matrix, doc_ids
 
 
@@ -111,7 +131,8 @@ def prepare_bow_data(corpus: Dict, dataset_name: str) -> Tuple:
 
     if cache['bow_data'].exists() and cache['vocab'].exists():
         print("Loading BoW data from cache...")
-        bow_data = np.load(cache['bow_data'])
+        # bow_data = np.load(cache['bow_data'])
+        bow_data = load_npz(str(cache['bow_data']).replace('.npy', '.npz'))
         with open(cache['vocab'], 'rb') as f:
             vocab_data = pickle.load(f)
         vocab      = vocab_data['vocab']
@@ -130,7 +151,8 @@ def prepare_bow_data(corpus: Dict, dataset_name: str) -> Tuple:
     embeddings        = np.array([vocab_embs[w] for w in vocab])
 
     print("Caching BoW data...")
-    np.save(cache['bow_data'],       bow_data)
+    # np.save(cache['bow_data'],       bow_data)
+    save_npz(str(cache['bow_data']).replace('.npy', '.npz'), bow_data)
     np.save(cache['word_embeddings'], embeddings)
     vocab_data = {'vocab': vocab, 'word_to_idx': preprocessor.word_to_idx}
     with open(cache['vocab'], 'wb') as f:

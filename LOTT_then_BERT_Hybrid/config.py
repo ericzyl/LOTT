@@ -52,7 +52,7 @@ def get_cache_paths(dataset_name: str) -> dict:
         'qrels':                    cache_subdir / 'qrels.pkl',
         'vocab':                    cache_subdir / 'vocabulary.pkl',
         'word_embeddings':          cache_subdir / 'word_embeddings.npy',
-        'bow_data':                 cache_subdir / 'bow_data.npy',
+        'bow_data':                 cache_subdir / 'bow_data.npz',
         'doc_ids':                  cache_subdir / 'doc_ids.pkl',
         'lda_model':                cache_subdir / 'lda_model.pkl',
         'lda_topics':               cache_subdir / 'lda_topics.npy',
