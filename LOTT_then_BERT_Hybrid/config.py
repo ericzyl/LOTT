@@ -11,7 +11,7 @@ RESULTS_DIR = PROJECT_ROOT / "results"
 for dir_path in [DATA_DIR, CACHE_DIR, RESULTS_DIR]:
     dir_path.mkdir(exist_ok=True, parents=True)
 
-AVAILABLE_DATASETS = ["msmarco"]
+AVAILABLE_DATASETS = ["msmarco", "trec-covid"]
 
 GLOVE_PATH = DATA_DIR / "dolma_300_2024_1.2M.100_combined.txt"
 GLOVE_DIM = 300
