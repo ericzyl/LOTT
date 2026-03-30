@@ -47,11 +47,16 @@ def _create_lott_embeddings(
     topic_cost_matrix: np.ndarray,
     label:             str = "items",
 ) -> np.ndarray:
-    print(f"Generating LOTT embeddings for {len(topic_proportions)} {label}...")
+    # print(f"Generating LOTT embeddings for {len(topic_proportions)} {label}...")
+    n = topic_proportions.shape[0]
+    print(f"Generating LOTT embeddings for {n} {label}...")
     embeddings = []
+    # for i, props in enumerate(topic_proportions):
+    #     if i % 2_000 == 0:
+    #         print(f"  LOTT progress: {i}/{len(topic_proportions)}")
     for i, props in enumerate(topic_proportions):
         if i % 2_000 == 0:
-            print(f"  LOTT progress: {i}/{len(topic_proportions)}")
+            print(f"  LOTT progress: {i}/{n}")
         props = props / props.sum() if props.sum() > 0 else np.ones_like(props) / len(props)
         coupling = ot.emd(props, reference_dist, topic_cost_matrix)
         embeddings.append(_lot_embedding(coupling, lda_centers))

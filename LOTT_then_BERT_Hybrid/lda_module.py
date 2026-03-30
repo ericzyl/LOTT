@@ -93,7 +93,8 @@ class LDAModule:
             print(f"Loading topic proportions from cache ({cache_key})...")
             return np.load(cache_path)
 
-        print(f"Inferring topic proportions for {len(bow_data)} items...")
+        # print(f"Inferring topic proportions for {len(bow_data)} items...")
+        print(f"Inferring topic proportions for {bow_data.shape[0]} items...")
         props = self.model.transform(bow_data)
         np.save(cache_path, props)
         return props
