@@ -5,8 +5,9 @@ PROJECT_ROOT = Path("/content/drive/MyDrive/LOTT")
 DATA_DIR = PROJECT_ROOT / "data"
 # CACHE_DIR = PROJECT_ROOT / "LOTT_then_BERT_Hybrid/cache"
 # RESULTS_DIR = PROJECT_ROOT / "LOTT_then_BERT_Hybrid/results"
-CACHE_DIR = PROJECT_ROOT / "cache"
-RESULTS_DIR = PROJECT_ROOT / "results"
+PROJECT_ROOT2 = Path("/content/drive/MyDrive/LOTT2")
+CACHE_DIR = PROJECT_ROOT2 / "cache"
+RESULTS_DIR = PROJECT_ROOT2 / "results"
 
 for dir_path in [DATA_DIR, CACHE_DIR, RESULTS_DIR]:
     dir_path.mkdir(exist_ok=True, parents=True)
