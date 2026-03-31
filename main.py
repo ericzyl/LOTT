@@ -17,6 +17,8 @@ import lot
 
 import bert
 
+from bm25 import knn_bm25, knn_bm25_lott
+
 # Download datasets used by Kusner et al from
 # https://www.dropbox.com/sh/nf532hddgdt68ix/AABGLUiPRyXv6UL2YAcHmAFqa?dl=0
 # and put them into
@@ -32,10 +34,10 @@ embeddings_path = './data/glove.6B/glove.6B.300d.txt'
 # Pick a dataset (uncomment the line you want)
 # data_name = 'bbcsport-emd_tr_te_split.mat'
 # data_name = 'twitter-emd_tr_te_split.mat'
-data_name = 'r8-emd_tr_te3.mat'
+# data_name = 'r8-emd_tr_te3.mat'
 # data_name = 'amazon-emd_tr_te_split.mat'
 # data_name = 'classic-emd_tr_te_split.mat'
-# data_name = 'ohsumed-emd_tr_te_ix.mat'
+data_name = 'ohsumed-emd_tr_te_ix.mat'
 
 # data_name = '20ng2_500-emd_tr_te.mat'
 # data_name = 'recipe2-emd_tr_te_split.mat'
@@ -70,7 +72,7 @@ bow_train, bow_test, topic_train, topic_test, y_train, y_test = train_test_split
 
 # Pick a method among RWMD, WMD, WMD-T20, HOTT, HOFTT
 methods = {
-        'LOTT': lot.lot,
+        # 'LOTT': lot.lot,
         # 'HOTT': hott.hott,
         # 'HOFTT': hott.hoftt,
         # 'WMD-T20': lambda p, q, C: distances.wmd(p, q, C, truncate=20),
@@ -81,7 +83,10 @@ methods = {
         # 'SBERT-large': None,
         # 'DistilBERT': None,
         # 'RoBERTa': None,
-        # 'BERT': None
+        # 'BERT': None,
+        'BM25': None,
+        'LOTT': lot.lot,
+        'BM25+LOTT': None
         }
     
 vocab = data['vocab'] # Vocabulary obtained from Data Object
@@ -173,6 +178,31 @@ for method in methods.keys():
 
     #     # Compute test error
     #     test_error = 1 - accuracy_score(y_test, y_pred)
+
+    elif method == 'BM25':
+        # --- pure BM25 KNN ---
+        test_error = knn_bm25(
+            bow_train, bow_test,
+            y_train, y_test,
+            n_neighbors=7
+        )
+        runtime = time.time() - t_s
+        num_pairs = len(bow_test) * len(bow_train)
+        pairs_per_second = num_pairs / runtime
+
+    elif method == 'BM25+LOTT':
+        # --- needs LOTT embeddings from the LOTT block above ---
+        # alpha=0.5 gives equal weight; tune between 0 and 1
+        test_error = knn_bm25_lott(
+            bow_train, bow_test,
+            np.array(X_train_lot), np.array(X_test_lot),
+            y_train, y_test,
+            alpha=0.5,
+            n_neighbors=7
+        )
+        runtime = time.time() - t_s
+        num_pairs = len(bow_test) * len(bow_train)
+        pairs_per_second = num_pairs / runtime
 
     else:
         if method in ['HOTT', 'HOFTT']:
