@@ -23,7 +23,7 @@ BERT_DIM = 384
 
 N_TOPICS = 300
 N_TOP_WORDS = 20
-LDA_MAX_ITER = 1000
+LDA_MAX_ITER = 500
 LDA_RANDOM_STATE = 42
 
 # LOTT retrieves this many candidates first (broad initial retrieval)
