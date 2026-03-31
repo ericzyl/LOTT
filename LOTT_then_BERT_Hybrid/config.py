@@ -26,13 +26,13 @@ LDA_MAX_ITER = 1000
 LDA_RANDOM_STATE = 42
 
 # LOTT retrieves this many candidates first (broad initial retrieval)
-K_LOTT_RETRIEVAL = 200
+K_LOTT_RETRIEVAL = 1000
 
 # BERT then reranks down to this final count
-K_FINAL = 10
+K_FINAL = 50
 
 # Evaluation K values
-TOP_K_VALUES = [1, 5, 10, 20]
+TOP_K_VALUES = [1, 5, 10, 20, 30, 50]
 
 MIN_WORD_LENGTH = 3
 MAX_VOCAB_SIZE = 10000
@@ -67,17 +67,24 @@ def get_cache_paths(dataset_name: str) -> dict:
         'faiss_lott_index':         cache_subdir / 'lott_faiss.index',
     }
 
+RUN_LABEL = "K1000_Top50"
 
 def get_results_path(dataset_name: str) -> Path:
-    return RESULTS_DIR / f"{dataset_name}_results.json"
+    return RESULTS_DIR / f"{dataset_name}_{RUN_LABEL}_results.json"
 
 
 def get_plot_path(dataset_name: str) -> Path:
-    return RESULTS_DIR / f"{dataset_name}_comparison.png"
+    return RESULTS_DIR / f"{dataset_name}_{RUN_LABEL}_comparison.png"
 
 
 def get_timing_plot_path(dataset_name: str) -> Path:
-    return RESULTS_DIR / f"{dataset_name}_timing.png"
+    return RESULTS_DIR / f"{dataset_name}_{RUN_LABEL}_timing.png"
+
+def get_mrr_map_plot_path(dataset_name: str) -> Path:
+    return RESULTS_DIR / f"{dataset_name}_{RUN_LABEL}_mrr_map.png"
+
+def get_delta_plot_path(dataset_name: str) -> Path:
+    return RESULTS_DIR / f"{dataset_name}_{RUN_LABEL}_delta.png"
 
 
 VERBOSE = True

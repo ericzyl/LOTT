@@ -116,7 +116,8 @@ def plot_mrr_map(results: dict, dataset_name: str):
     ax.legend(fontsize=10)
     plt.tight_layout()
 
-    p = config.RESULTS_DIR / f"{dataset_name}_mrr_map.png"
+    # p = config.RESULTS_DIR / f"{dataset_name}_mrr_map.png"
+    p = config.get_mrr_map_plot_path(dataset_name)
     plt.savefig(p, bbox_inches='tight')
     print(f"Saved MRR/MAP plot → {p}")
     plt.close()
@@ -215,7 +216,8 @@ def plot_delta(results: dict, dataset_name: str):
                 va='bottom' if d >= 0 else 'top', fontsize=9)
 
     plt.tight_layout()
-    p = config.RESULTS_DIR / f"{dataset_name}_delta.png"
+    # p = config.RESULTS_DIR / f"{dataset_name}_delta.png"
+    p = config.get_delta_plot_path(dataset_name)
     plt.savefig(p, bbox_inches='tight')
     print(f"Saved delta plot → {p}")
     plt.close()
