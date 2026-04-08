@@ -72,9 +72,9 @@ bow_train, bow_test, topic_train, topic_test, y_train, y_test = train_test_split
 
 # Pick a method among RWMD, WMD, WMD-T20, HOTT, HOFTT
 methods = {
-        # 'LOTT': lot.lot,
-        # 'HOTT': hott.hott,
-        # 'HOFTT': hott.hoftt,
+        'LOTT': lot.lot,
+        'HOTT': hott.hott,
+        'HOFTT': hott.hoftt,
         # 'WMD-T20': lambda p, q, C: distances.wmd(p, q, C, truncate=20),
         # 'RWMD': distances.rwmd,
         # 'WMD': distances.wmd,
@@ -84,9 +84,9 @@ methods = {
         # 'DistilBERT': None,
         # 'RoBERTa': None,
         # 'BERT': None,
-        'BM25': None,
-        'LOTT': lot.lot,
-        'BM25+LOTT': None
+        # 'BM25': None,
+        # 'LOTT': lot.lot,
+        # 'BM25+LOTT': None
         }
     
 vocab = data['vocab'] # Vocabulary obtained from Data Object
